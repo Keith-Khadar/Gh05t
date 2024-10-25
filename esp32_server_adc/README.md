@@ -57,7 +57,7 @@ On connection, the BLE client will receive the analog values every 2 seconds.
 Sample output on the serial monitor:
 ![Arduino IDE output](Expected_Arduino_IDE_output.png)
 
-Sample output on the nRF Connect app:
+Sample output on the nRF Connect app:<br>
 ![nRF Connect output](nRF_Connect_output.png)
 
 ## Troubleshooting
