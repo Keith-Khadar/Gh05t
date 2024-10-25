@@ -54,8 +54,8 @@ For specific details, please refer to inline comments.
 
 ## Example Output
 On connection, the BLE client will receive the analog values every 2 seconds. Here’s a sample output on the serial monitor:
-![Arduino IDE output](Expected Arduino IDE output.png)
-![nRF Connect output](nRF Connect output.png)
+![Arduino IDE output](Expected_Arduino_IDE_output.png)
+![nRF Connect output](nRF_Connect_output.png)
 
 ## Troubleshooting
 - Ensure the ESP32-C6 board is selected and it is connected to the correct COM port.
