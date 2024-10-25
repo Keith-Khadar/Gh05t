@@ -13,6 +13,7 @@ analog value.
 - **Software**: 
   - Arduino IDE with ESP32 board support
   - ESP32 BLE library (compatible with ESP32-C6)
+  - Download nRFConnect app on the phone
 
 ## Setup Instructions
 1. **Setting up ESP32 board option in the Arduino IDE** 
