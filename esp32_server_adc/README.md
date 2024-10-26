@@ -61,6 +61,9 @@ Sample output on the serial monitor:
 Sample output on the nRF Connect app:<br>
 ![nRF Connect output](nRF_Connect_output.png)
 
+## Mobile Interaction
+Since this project utilizes Bluetooth Low Energy (BLE), users need to manually poll the mobile application to retrieve the latest ADC values. 
+
 ## Troubleshooting
 - Ensure the ESP32-C6 board is selected and it is connected to the correct COM port.
 - Check that the correct libraries have been installed in Arduino IDE.
