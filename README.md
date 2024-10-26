@@ -60,7 +60,7 @@ The architecture of the project is structured as follows:
   - Fix: Looking into alternative unplated snap connectors.
 - **Inaccurate EEG Data**: Data recorded during initial testing is inaccurate.
   - The poor quality electrodes(see snap plating challenge & 3d printing fail) as well as the ADC optimized for Electromyography (EMG) data recording instead of the use case of Electroencephalography (EEG), resulted in poor quality data.
-  - Fix: Custom designed PCB breakout board for the ADS1299 which is designed for EMG.
+  - Fix: Custom designed PCB breakout board for the ADS1299 which is designed for EEG data acquisition.
 
 ## License
 
