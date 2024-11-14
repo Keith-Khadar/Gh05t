@@ -3370,12 +3370,8 @@
 		(uuid "f390d05d-dbd9-4ec1-baae-07db0563423f")
 	)
 	(no_connect
-		(at 212.09 157.48)
-		(uuid "4baa358b-4a1b-4292-9822-2042b24fac8c")
-	)
-	(no_connect
 		(at 212.09 152.4)
-		(uuid "ae8c2c5f-4f91-400c-b7a0-b4bb103671bf")
+		(uuid "b1fbd083-38bb-470a-8b1a-f8faca127698")
 	)
 	(wire
 		(pts
@@ -5957,7 +5953,7 @@
 		)
 		(uuid "07cebb3a-1ce2-444a-aedc-18843fe80d7a")
 	)
-	(label "3P"
+	(label "2N"
 		(at 217.17 124.46 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6023,7 +6019,7 @@
 		)
 		(uuid "0d23698f-d818-462c-b425-d42fd2928151")
 	)
-	(label "6P"
+	(label "5N"
 		(at 215.9 74.93 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6034,7 +6030,7 @@
 		)
 		(uuid "0dad162c-22e3-466c-b471-3ad13f61b920")
 	)
-	(label "5N"
+	(label "4P"
 		(at 215.9 95.25 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6122,7 +6118,18 @@
 		)
 		(uuid "1659c6cf-499a-454b-8e94-1ff51fad2948")
 	)
-	(label "7N"
+	(label "SRB2"
+		(at 171.45 152.4 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "168b9389-35aa-43bd-b518-14f30c744e4f")
+	)
+	(label "6P"
 		(at 215.9 67.31 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6144,7 +6151,7 @@
 		)
 		(uuid "179ebd15-b9bc-4a49-abac-0d8ace62a3ab")
 	)
-	(label "_SRB1"
+	(label "AGND"
 		(at 237.49 157.48 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6166,7 +6173,7 @@
 		)
 		(uuid "1cd8a81b-1326-414b-a1e3-54353a33ff2f")
 	)
-	(label "1P"
+	(label "SRB1"
 		(at 218.44 152.4 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6243,6 +6250,17 @@
 		)
 		(uuid "2d719c36-f32b-404e-b180-58a46622f898")
 	)
+	(label "SRB1"
+		(at 171.45 157.48 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "3057f583-6617-46f5-aee8-915423d8509d")
+	)
 	(label "AVDD"
 		(at 68.58 21.59 0)
 		(fields_autoplaced yes)
@@ -6265,7 +6283,7 @@
 		)
 		(uuid "30f33694-8dba-42c9-b848-f3daddcf10ad")
 	)
-	(label "BIAS"
+	(label "8P"
 		(at 215.9 39.37 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6298,7 +6316,7 @@
 		)
 		(uuid "32eaf4b4-e2a9-4114-9bca-2d390c0cfe9b")
 	)
-	(label "IN2N"
+	(label "IN1P"
 		(at 237.49 127 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6364,7 +6382,7 @@
 		)
 		(uuid "3ad40461-8240-491c-9182-ec7daaa25f92")
 	)
-	(label "7P"
+	(label "6N"
 		(at 215.9 69.85 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6397,7 +6415,7 @@
 		)
 		(uuid "3efd7ecb-678a-4874-8aea-cb950607f142")
 	)
-	(label "AGND"
+	(label "IN8N"
 		(at 236.22 41.91 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6408,7 +6426,7 @@
 		)
 		(uuid "40110a05-bf4e-4640-952a-45a701bfef7c")
 	)
-	(label "AGND"
+	(label "8N"
 		(at 215.9 41.91 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6452,7 +6470,7 @@
 		)
 		(uuid "4621d506-65a4-472e-bc1b-53c71e5e6fe2")
 	)
-	(label "3N"
+	(label "2P"
 		(at 217.17 121.92 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6463,7 +6481,7 @@
 		)
 		(uuid "4798435b-a37b-4e7f-bc51-076d1c5b42ae")
 	)
-	(label "IN6P"
+	(label "IN5N"
 		(at 236.22 74.93 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6485,7 +6503,7 @@
 		)
 		(uuid "4ba9864b-6561-4af9-a1b3-dbd949054c5b")
 	)
-	(label "AVSS"
+	(label "BIAS"
 		(at 140.97 146.05 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6540,7 +6558,7 @@
 		)
 		(uuid "4edd8ba1-5450-45e2-a6d4-615cc93638cb")
 	)
-	(label "IN7P"
+	(label "IN6N"
 		(at 236.22 69.85 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6562,7 +6580,7 @@
 		)
 		(uuid "501a4a5e-9554-4f60-8b33-7ff1574b4548")
 	)
-	(label "IN1N"
+	(label "BIAS_DRV"
 		(at 237.49 149.86 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6595,7 +6613,7 @@
 		)
 		(uuid "5711dd84-d27e-4cbc-b5f6-b3e76db73015")
 	)
-	(label "IN8P"
+	(label "IN7N"
 		(at 236.22 46.99 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6650,7 +6668,7 @@
 		)
 		(uuid "61106279-1441-4df2-8342-ca7908cdbad5")
 	)
-	(label "IN1P"
+	(label "_SRB1"
 		(at 237.49 152.4 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6716,7 +6734,7 @@
 		)
 		(uuid "674522ff-1926-4562-9f07-e2a935b6c009")
 	)
-	(label "IN3N"
+	(label "IN2P"
 		(at 237.49 121.92 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6782,7 +6800,7 @@
 		)
 		(uuid "6bcb612f-5f94-4e5a-ab2a-f1e6ab98e86e")
 	)
-	(label "IN3P"
+	(label "IN2N"
 		(at 237.49 124.46 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6848,7 +6866,7 @@
 		)
 		(uuid "71e75140-c891-462e-9e0d-daa68f61db66")
 	)
-	(label "2N"
+	(label "1P"
 		(at 217.17 127 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6936,7 +6954,7 @@
 		)
 		(uuid "7a124da8-d729-4313-bfa1-3841c22aab4a")
 	)
-	(label "4P"
+	(label "3N"
 		(at 215.9 102.87 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6958,7 +6976,7 @@
 		)
 		(uuid "7fa98284-c3b9-4002-97eb-f520e5b022bc")
 	)
-	(label "AGND"
+	(label "AVDD"
 		(at 100.33 151.13 180)
 		(fields_autoplaced yes)
 		(effects
@@ -6991,7 +7009,7 @@
 		)
 		(uuid "84884e42-593a-40d6-9923-2d43c16d6609")
 	)
-	(label "BIAS"
+	(label "AVSS"
 		(at 144.78 151.13 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7002,7 +7020,7 @@
 		)
 		(uuid "8566b268-bedd-4943-addb-31c39ddd233e")
 	)
-	(label "IN4N"
+	(label "IN3P"
 		(at 236.22 100.33 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7013,7 +7031,7 @@
 		)
 		(uuid "861c492f-066d-4a5b-882b-8ba85d29cfc6")
 	)
-	(label "4N"
+	(label "3P"
 		(at 215.9 100.33 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7024,7 +7042,7 @@
 		)
 		(uuid "8bda52ac-765d-400e-9b95-35154ab6a9bc")
 	)
-	(label "IN8N"
+	(label "IN7P"
 		(at 236.22 44.45 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7145,7 +7163,7 @@
 		)
 		(uuid "a7ebbb6d-f648-4fbd-99b3-5c36c648fa94")
 	)
-	(label "IN5P"
+	(label "IN4N"
 		(at 236.22 97.79 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7156,7 +7174,7 @@
 		)
 		(uuid "a8039ad7-9424-4e18-97e8-34733751ab11")
 	)
-	(label "AVDD"
+	(label "BIASINV"
 		(at 100.33 146.05 180)
 		(fields_autoplaced yes)
 		(effects
@@ -7189,7 +7207,7 @@
 		)
 		(uuid "abbaeb9a-b575-4dbf-8169-510745a41198")
 	)
-	(label "5P"
+	(label "4N"
 		(at 215.9 97.79 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7222,7 +7240,7 @@
 		)
 		(uuid "aefc2bf1-2ef0-49fc-9528-115881d79500")
 	)
-	(label "IN7N"
+	(label "IN6P"
 		(at 236.22 67.31 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7277,7 +7295,7 @@
 		)
 		(uuid "b7b5deec-538b-4624-82e8-c0067cc67464")
 	)
-	(label "IN4P"
+	(label "IN3N"
 		(at 236.22 102.87 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7309,17 +7327,6 @@
 			(justify left bottom)
 		)
 		(uuid "ba459a94-0bdf-4ed0-b330-296d37ce0743")
-	)
-	(label "SRB2"
-		(at 171.45 157.48 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "ba6ed7d5-9aaa-4432-8803-d953646f99d0")
 	)
 	(label "AGND"
 		(at 275.59 40.64 0)
@@ -7387,7 +7394,7 @@
 		)
 		(uuid "c5b7e56c-ceef-4593-9b27-c3ec0bedf39e")
 	)
-	(label "6N"
+	(label "5P"
 		(at 215.9 72.39 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7431,7 +7438,7 @@
 		)
 		(uuid "c9981c54-a7d2-43cc-8293-41b8d68acbef")
 	)
-	(label "8N"
+	(label "7P"
 		(at 215.9 44.45 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7486,7 +7493,7 @@
 		)
 		(uuid "ce0e34e4-3373-4c80-ab33-ca69e0482ce9")
 	)
-	(label "2P"
+	(label "1N"
 		(at 217.17 129.54 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7497,7 +7504,7 @@
 		)
 		(uuid "ceeb13a9-493e-4841-b406-f73ac4be2c2f")
 	)
-	(label "IN2P"
+	(label "IN1N"
 		(at 237.49 129.54 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7585,7 +7592,18 @@
 		)
 		(uuid "d8923c2a-c4fe-4393-a9aa-bfc96c654154")
 	)
-	(label "8P"
+	(label "AVDD"
+		(at 212.09 157.48 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d89b84f1-b606-49dc-a15a-f754a2c40736")
+	)
+	(label "7N"
 		(at 215.9 46.99 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7618,7 +7636,7 @@
 		)
 		(uuid "de7f7872-3604-4fe1-b2f6-be93f486f919")
 	)
-	(label "SRB1"
+	(label "AGND"
 		(at 218.44 157.48 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7629,7 +7647,7 @@
 		)
 		(uuid "e32139b5-f944-4c8a-9113-59ef61f46287")
 	)
-	(label "BIAS_DRV"
+	(label "IN8P"
 		(at 236.22 39.37 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7706,18 +7724,7 @@
 		)
 		(uuid "ed81ac63-575c-41ed-95b6-a5ff16219da0")
 	)
-	(label "SRB1"
-		(at 171.45 152.4 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "f0c82045-edf2-4f1e-af4a-c121acc36342")
-	)
-	(label "1N"
+	(label "BIAS"
 		(at 218.44 149.86 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7728,7 +7735,7 @@
 		)
 		(uuid "f13bcfa6-5964-468d-ab64-a20a314204d8")
 	)
-	(label "IN5N"
+	(label "IN4P"
 		(at 236.22 95.25 0)
 		(fields_autoplaced yes)
 		(effects
@@ -7794,7 +7801,7 @@
 		)
 		(uuid "f511765c-e1a2-49d1-b65c-d4643829880e")
 	)
-	(label "IN6N"
+	(label "IN5P"
 		(at 236.22 72.39 0)
 		(fields_autoplaced yes)
 		(effects
