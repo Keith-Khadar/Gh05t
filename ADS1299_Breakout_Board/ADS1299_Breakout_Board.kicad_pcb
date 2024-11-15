@@ -816,7 +816,7 @@
 				)
 			)
 		)
-		(property "Footprint" "CAPCAF50P200X125X85-8"
+		(property "Footprint" "W3A45C102K4T2A (c array):CAPCAF50P200X125X85-8"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -1697,7 +1697,7 @@
 				)
 			)
 		)
-		(property "Footprint" "DRL6_TEX"
+		(property "Footprint" "TPD4E1B06 (ESD):DRL6_TEX"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
@@ -2972,7 +2972,7 @@
 				)
 			)
 		)
-		(property "Footprint" "CAPCAF50P200X125X85-8"
+		(property "Footprint" "W3A45C102K4T2A (c array):CAPCAF50P200X125X85-8"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -3372,7 +3372,7 @@
 				)
 			)
 		)
-		(property "Footprint" "DRL6_TEX"
+		(property "Footprint" "TPD4E1B06 (ESD):DRL6_TEX"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
@@ -4327,7 +4327,7 @@
 				)
 			)
 		)
-		(property "Footprint" "QFP50P1200X1200X120-64N"
+		(property "Footprint" "ADS1299:QFP50P1200X1200X120-64N"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -5351,6 +5351,17 @@
 			(solder_mask_margin 0.102)
 			(uuid "76a90bb0-9941-4090-96a4-8730c71267d6")
 		)
+		(model "${KIPRJMOD}/KiCad_Lib/ADS1299/ADS1299IPAG.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 0 0)
+			)
+		)
 	)
 	(footprint "Capacitor_SMD:C_0805_2012Metric"
 		(layer "F.Cu")
@@ -6192,7 +6203,7 @@
 				)
 			)
 		)
-		(property "Footprint" "CAPCAF50P200X125X85-8"
+		(property "Footprint" "W3A45C102K4T2A (c array):CAPCAF50P200X125X85-8"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
@@ -6806,7 +6817,7 @@
 				)
 			)
 		)
-		(property "Footprint" "DRL6_TEX"
+		(property "Footprint" "TPD4E1B06 (ESD):DRL6_TEX"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
@@ -7936,7 +7947,7 @@
 				)
 			)
 		)
-		(property "Footprint" "DRL6_TEX"
+		(property "Footprint" "TPD4E1B06 (ESD):DRL6_TEX"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
@@ -9108,7 +9119,7 @@
 				)
 			)
 		)
-		(property "Footprint" "DRL6_TEX"
+		(property "Footprint" "TPD4E1B06 (ESD):DRL6_TEX"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
@@ -9635,7 +9646,7 @@
 				)
 			)
 		)
-		(property "Footprint" "CAPCAF50P200X125X85-8"
+		(property "Footprint" "W3A45C102K4T2A (c array):CAPCAF50P200X125X85-8"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -10032,7 +10043,7 @@
 				)
 			)
 		)
-		(property "Footprint" "CAPCAF50P200X125X85-8"
+		(property "Footprint" "W3A45C102K4T2A (c array):CAPCAF50P200X125X85-8"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
@@ -10765,7 +10776,7 @@
 				)
 			)
 		)
-		(property "Footprint" "DRL6_TEX"
+		(property "Footprint" "TPD4E1B06 (ESD):DRL6_TEX"
 			(at 0 0 -90)
 			(layer "F.Fab")
 			(hide yes)
