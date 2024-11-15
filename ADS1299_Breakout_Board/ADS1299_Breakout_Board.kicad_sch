@@ -1989,7 +1989,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "DIP* SOIC* R*Array*Concave* R*Array*Convex* MSOP*"
+			(property "ki_fp_filters" "DIP* SOIC* R*Array*Concave* R*Array*Convex*"
 				(at 0 0 0)
 				(effects
 					(font
@@ -8299,7 +8299,7 @@
 			(uuid "bc168c29-ee97-4994-974a-2a54a7ca36fe")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "U1")
 					(unit 1)
@@ -8435,7 +8435,7 @@
 			(uuid "9067f62b-1dc4-4244-930a-5b5281f15ec5")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C5")
 					(unit 1)
@@ -9086,7 +9086,7 @@
 			(uuid "f10a32e8-9bdb-45a2-a86d-cbb7451a9958")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "U2")
 					(unit 1)
@@ -9652,7 +9652,7 @@
 			(uuid "8c0034f4-8206-4196-a8c5-67fb9153fb48")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C11")
 					(unit 1)
@@ -9718,7 +9718,7 @@
 			(uuid "63f7fb0f-362a-459a-bfbf-2cf32ddd2048")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "#PWR01")
 					(unit 1)
@@ -9942,7 +9942,7 @@
 			(uuid "e3c07e12-236d-4cf4-a8ad-03f0732f355e")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C2")
 					(unit 1)
@@ -10011,7 +10011,7 @@
 			(uuid "e35dd94c-5d5e-4a79-aace-fd6fb2b84c29")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C4")
 					(unit 1)
@@ -10077,7 +10077,7 @@
 			(uuid "67327142-bb18-48d8-9cf2-c1a22f8346eb")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "#PWR02")
 					(unit 1)
@@ -10143,7 +10143,7 @@
 			(uuid "c80ed2a3-227c-4572-803e-a6efc49ad609")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "#PWR06")
 					(unit 1)
@@ -10314,7 +10314,7 @@
 			(uuid "8c32b823-4242-4465-aaaf-61ac0dd64ce7")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "J1")
 					(unit 1)
@@ -10619,7 +10619,7 @@
 			(uuid "9eb7484c-0d87-40d6-a2aa-055690629028")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C1")
 					(unit 1)
@@ -11076,7 +11076,7 @@
 			(uuid "152df2c3-a1bb-4401-9538-e0f491e4ac61")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C6")
 					(unit 1)
@@ -11146,7 +11146,7 @@
 			(uuid "11dec953-c3fd-4b71-a40c-6680a5340732")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C8")
 					(unit 1)
@@ -11423,7 +11423,7 @@
 			(uuid "645b1b3d-d139-4b61-ac85-5b95e8302e7a")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C3")
 					(unit 1)
@@ -11716,7 +11716,7 @@
 			(uuid "fa376875-cb73-418c-b8c9-e09bcb7e44c8")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "RN1")
 					(unit 1)
@@ -12007,7 +12007,7 @@
 			(uuid "4a251069-8b28-4480-8e4f-f3f1aa9270af")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C7")
 					(unit 1)
@@ -12077,7 +12077,7 @@
 			(uuid "caf8435f-880f-4829-9f44-155b3b290326")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C9")
 					(unit 1)
@@ -12227,7 +12227,7 @@
 			(uuid "a032740f-9084-4762-8899-8be81d7146d1")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "R1")
 					(unit 1)
@@ -12295,7 +12295,7 @@
 			(uuid "090124fa-7e3c-44ea-925c-8804a49bc406")
 		)
 		(instances
-			(project ""
+			(project "ADS1299_Breakout_Board"
 				(path "/a7ecf18b-717c-4f2c-af90-a359126ba9c0"
 					(reference "C10")
 					(unit 1)
