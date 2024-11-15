@@ -1,0 +1,7 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "TPD4E1B06")(type "KiCad")(uri "${KIPRJMOD}/KiCad_Lib/TPD4E1B06/footprints.pretty")(options "")(descr ""))
+  (lib (name "ADS1299")(type "KiCad")(uri "${KIPRJMOD}/KiCad_Lib/ADS1299")(options "")(descr ""))
+  (lib (name "LSM6DSOX")(type "KiCad")(uri "${KIPRJMOD}/KiCad_Lib/LSM6DSOX")(options "")(descr ""))
+  (lib (name "W3A45C102K4T2A")(type "KiCad")(uri "${KIPRJMOD}/KiCad_Lib/W3A45C102K4T2A")(options "")(descr ""))
+)
