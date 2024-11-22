@@ -32,8 +32,12 @@ The architecture of the project is structured as follows:
  
 - **Machine Learning**:
   - Format:
-    - Input: Raw 4 channel electrode data
+    - Input: Raw (or pre-processed) 4 channel electrode data
     - Output: 2D skeleton pose
+  - Backbone:
+    - RTMPose3d: Multi-person 3D Pose Estimator
+  - Preprocessing:
+    - Blind Signal Source Separation
 
 - **Frontend**:
   - Frameworks:
