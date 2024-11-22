@@ -17,7 +17,11 @@ pip install -U openmim
 mim install mmengine
 mim install "mmcv>=2.0.1, <2.2.0"
 mim install "mmdet>=3.1.0, <3.3.0"
+```
 
+Clone the mmpose repo, and install all requirements:
+
+```
 git clone https://github.com/open-mmlab/mmpose.git
 cd mmpose
 pip install -r requirements.txt
@@ -27,7 +31,7 @@ pip install -v -e .
 Navigate:
 
 ```
-cd mmpose/projects/rtmpose3d
+cd projects/rtmpose3d
 mkdir outputs
 mkdir inputs
 mkdir checkpoints
