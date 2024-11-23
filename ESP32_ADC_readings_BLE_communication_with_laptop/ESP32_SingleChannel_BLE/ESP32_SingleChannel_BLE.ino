@@ -51,7 +51,7 @@ void setup() {
   pAdvertising->setMinPreferred(0x12);
   // Start advertising the service
   pAdvertising->start();
-  Serial.println("Characteristic defined, it can now be read in your phone!");
+  Serial.println("Characteristic defined, it can now be read in laptop!");
 }
 
 void loop() {
