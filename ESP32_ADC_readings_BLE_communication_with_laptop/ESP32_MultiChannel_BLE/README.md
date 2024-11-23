@@ -5,6 +5,9 @@ A two-part implementation to communicate between an ESP32-C6 board and a laptop 
 The ESP32 reads multichannel analog signals and sends the data to a connected device using BLE. On the computer side, a Python program connects to the ESP32, 
 receives the data, and stores it in a file and plots the voltage readings.
 
+![image](https://github.com/user-attachments/assets/9fc3b1ea-21c7-4ed2-8131-7ace7a2a633e)
+
+
 ## Files
 1. **ESP32_MultiChannel_BLE.ino**  : Reads analog signals from three channels,convert the readings into voltage value and sends the voltage values via a BLE characteristic.
 2. **ConnectToESP32.py**  : Scans for the ESP32 BLE device, connects and reads BLE data from the ESP32 and then saves the received data to an `.npz` file for later use.
