@@ -45,6 +45,7 @@ The architecture of the project is structured as follows:
   - Target:
     - RTMPose3d: Multi-person 3D Pose Estimator, generates Pose Information
     - Motion Estimates: Process pose data to generate *relative* motion estimates
+    - [Demo](./pose-recognition/DEMO_GH05T.mp4)
   - Model:
     - Structure: Artifical Neural Network (Regressor)
     - Pre-Training: PCA-Pretraining for optimal features
