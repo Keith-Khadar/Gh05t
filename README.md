@@ -29,15 +29,25 @@ The architecture of the project is structured as follows:
 - **Communication API**:
   - Format: Serial Communication(Bluetooth Classic) || Server Communication(BLE)
   - Structure: Undecided
- 
+
+- **Signal Processing**:
+  - Format:
+    - Input: Raw 4 channel electrode data
+    - Output: K-Independent Signals (Components)
+  - Processing Options:
+    - FastICA or JADE: Fast Inference
+    - InfoMax or EInfoMax: Versatility & Robustness
+
 - **Machine Learning**:
   - Format:
-    - Input: Raw (or pre-processed) 4 channel electrode data
-    - Output: 2D skeleton pose
-  - Backbone:
-    - RTMPose3d: Multi-person 3D Pose Estimator
-  - Preprocessing:
-    - Blind Signal Source Separation
+    - Input: K-Independent Signals (Components)
+    - Output: 3D-Pose using 133 Keypoints
+  - Target:
+    - RTMPose3d: Multi-person 3D Pose Estimator, produces Target Data/Labels
+  - Model:
+    - Structure: Artifical Neural Network (Regressor)
+    - Pre-Training: PCA-Pretraining for optimal features
+    - Training: Network Tuning based on Target Data
 
 - **Frontend**:
   - Frameworks:
