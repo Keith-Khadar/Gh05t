@@ -7,7 +7,7 @@ The code demonstrates a successful setup of a BLE (Bluetooth Low Energy) communi
 Figure: XIAO ESP32C6 Pin list (https://wiki.seeedstudio.com/xiao_pin_multiplexing_esp33c6/)
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/b415cdd3-fc51-4de3-aa8b-a30394841169" alt="Image Description" />
+  <img src="https://github.com/user-attachments/assets/b415cdd3-fc51-4de3-aa8b-a30394841169" alt="Circuit design" />
 </p>
 Figure: The circuit design for testing the code. (The breadboard has been excluded to enhance clarity.)
 
