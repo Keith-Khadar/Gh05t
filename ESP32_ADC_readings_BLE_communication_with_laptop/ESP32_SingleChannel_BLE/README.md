@@ -76,6 +76,7 @@ python3 ConnectToESP32.py
 
 ## Sample Output
 ![image](https://github.com/user-attachments/assets/e224dcb2-3c19-457a-a340-7501aabee496)
+
 Figure: Output for ESP32_SingleChannel_BLE.ino in Arduino IDE.
 
 ![image](https://github.com/user-attachments/assets/08a7d620-5892-4689-b54e-f446c59a353c)
