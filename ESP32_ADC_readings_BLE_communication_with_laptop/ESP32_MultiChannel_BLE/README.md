@@ -6,7 +6,10 @@ The ESP32 reads multichannel analog signals and sends the data to a connected de
 receives the data, and stores it in a file and plots the voltage readings.
 
 ![image](https://github.com/user-attachments/assets/9fc3b1ea-21c7-4ed2-8131-7ace7a2a633e)
+Figure: XIAO ESP32C6 Pin list (https://wiki.seeedstudio.com/xiao_pin_multiplexing_esp33c6/)
 
+![image](https://github.com/user-attachments/assets/f12b0e81-636c-47bd-9117-992593881405)
+Figure: The circuit design for testing the code. (The breadboard has been excluded to enhance clarity.)
 
 ## Files
 1. **ESP32_MultiChannel_BLE.ino**  : Reads analog signals from three channels,convert the readings into voltage value and sends the voltage values via a BLE characteristic.
