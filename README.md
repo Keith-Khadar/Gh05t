@@ -30,7 +30,7 @@ The architecture of the project is structured as follows:
   - Format: Serial Communication(Bluetooth Classic) || Server Communication(BLE)
   - Structure: Undecided
 
-- **Signal Processing**:
+- **EEG Signal Pre-processing**:
   - Format:
     - Input: Raw 4 channel electrode data
     - Output: K-Independent Signals (Components)
@@ -38,12 +38,13 @@ The architecture of the project is structured as follows:
     - FastICA or JADE: Fast Inference
     - InfoMax or EInfoMax: Versatility & Robustness
 
-- **Machine Learning**:
+- **EEG Signal Machine Learning**:
   - Format:
     - Input: K-Independent Signals (Components)
     - Output: 3D-Pose using 133 Keypoints
   - Target:
-    - RTMPose3d: Multi-person 3D Pose Estimator, produces Target Data/Labels
+    - RTMPose3d: Multi-person 3D Pose Estimator, generates Pose Information
+    - Motion Estimates: Process pose data to generate *relative* motion estimates
   - Model:
     - Structure: Artifical Neural Network (Regressor)
     - Pre-Training: PCA-Pretraining for optimal features
