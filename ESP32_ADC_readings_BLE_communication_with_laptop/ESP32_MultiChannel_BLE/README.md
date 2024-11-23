@@ -71,6 +71,7 @@ Place the input_data.npz file in the same directory as PlotGraph.py.
 ## Sample Output
 
 ![image](https://github.com/user-attachments/assets/07d5cbc3-f2a9-4058-a162-9bed9cb160d9)
+
 Figure: Output for ESP32_MultiChannel_BLE.ino in Arduino IDE.
 
 ![image](https://github.com/user-attachments/assets/5b5c8dd7-9db4-4875-a4f4-b1ec18e5f7ae)
