@@ -63,7 +63,7 @@ The architecture of the project is structured as follows:
 
 ## Known Bugs
 
-- **Pose ML Model Offset**: The pose recognition machine learning model offsets the generated skeleton by a set amount. ![image](https://github.com/user-attachments/assets/c28c0a2e-da3d-4fa4-a920-4a78a1bb0804)
+- ~~**Pose ML Model Offset**: The pose recognition machine learning model offsets the generated skeleton by a set amount. ![image](https://github.com/user-attachments/assets/c28c0a2e-da3d-4fa4-a920-4a78a1bb0804)~~
 
 ## Difficulties/Challenges
 
