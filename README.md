@@ -43,7 +43,7 @@ The architecture of the project is structured as follows:
     - Input: K-Independent Signals (Components)
     - Output: 3D-Pose using 133 Keypoints
   - Target:
-    - RTMPose3d: Multi-person 3D Pose Estimator, generates Pose Information
+    - [RTMPose3d](https://github.com/open-mmlab/mmpose/tree/main/projects/rtmpose3d): Multi-person 3D Pose Estimator, generates Pose Information
     - Motion Estimates: Process pose data to generate *relative* motion estimates
     - [Demo](./pose-recognition/DEMO_GH05T.mp4)
   - Model:
