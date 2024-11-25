@@ -4,6 +4,8 @@
 
 To get started, make sure that you have a CUDA 12.x version, with a compatible Ubuntu version. Also make sure to have mini-conda and Python pre-installed.
 
+### Personal Computers:
+
 Create the following environment:
 
 ```
@@ -17,6 +19,25 @@ pip install -U openmim
 mim install mmengine
 mim install "mmcv>=2.0.1, <2.2.0"
 mim install "mmdet>=3.1.0, <3.3.0"
+```
+
+### Jetson Nano:
+
+```
+conda create --name openmmlab python=3.9 -y
+conda activate openmmlab
+pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu12
+
+pip install -U openmim
+mim install mmengine
+mim install "mmcv>=2.0.1, <2.2.0"
+mim install "mmdet>=3.1.0, <3.3.0"
+```
+If the libstdc++ version is causing issues, ensure to install the correct version and assert:
+```
+LD_PRELOAD=/home/USER/miniconda3/pkgs/libstdcxx-ng-13.2.0-h9a76618_5/lib/libstdc++.so.6 mim install "mmcv>=2.0.1, <2.2.0"
+LD_PRELOAD=/home/USER/miniconda3/pkgs/libstdcxx-ng-13.2.0-h9a76618_5/lib/libstdc++.so.6 mim install "mmcv>=2.0.1, <2.2.0"
+LD_PRELOAD=/home/USER/miniconda3/pkgs/libstdcxx-ng-13.2.0-h9a76618_5/lib/libstdc++.so.6 mim install "mmdet>=3.1.0, <3.3.0"
 ```
 
 Clone the mmpose repo, and install all requirements:
