@@ -35,7 +35,7 @@ Place the input_data.npz file in the same directory as PlotGraph.py.
   - `bleak` (Python BLE library)
   - `numpy` (for saving data)
 - Ensure Python packages like asyncio, numpy, tkinter, matplotlib, and threading are installed.
-  pip install bleak numpy matplotlib
+  `pip install bleak numpy matplotlib`
 
 ## Usage Instructions
 
