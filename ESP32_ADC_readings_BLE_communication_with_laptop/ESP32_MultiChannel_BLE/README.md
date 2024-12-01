@@ -31,11 +31,11 @@ Place the input_data.npz file in the same directory as PlotGraph.py.
 
 ### Software Requirements:
 - Arduino IDE for programming the ESP32
+- VS Code/ PyCharm
 - Python 3.7+ with the following installed:
   - `bleak` (Python BLE library)
   - `numpy` (for saving data)
-- Ensure Python packages like asyncio, numpy, tkinter, matplotlib, and threading are installed in PyCharm.
-  `pip install bleak numpy matplotlib`
+- Ensure Python packages like asyncio, numpy, tkinter, matplotlib, and threading are installed.
 
 ## Usage Instructions
 
