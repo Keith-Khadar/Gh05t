@@ -82,5 +82,5 @@ Figure: Output for ConnectToESP32.py.
 
 Figure: Output for PlotGraph.py.
 
-[Link to code demo:]
+Link to code demo:
 (https://uflorida-my.sharepoint.com/:v:/g/personal/stuti_ruparel_ufl_edu/ESNoCNtR7i9FpQU0D6yvmBcBnizOJJ-Oh_DsOwetzQaeqw?e=tKyc3b&nav=eyJyZWZlcnJhbEluZm8iOnsicmVmZXJyYWxBcHAiOiJTdHJlYW1XZWJBcHAiLCJyZWZlcnJhbFZpZXciOiJTaGFyZURpYWxvZy1MaW5rIiwicmVmZXJyYWxBcHBQbGF0Zm9ybSI6IldlYiIsInJlZmVycmFsTW9kZSI6InZpZXcifX0%3D)
