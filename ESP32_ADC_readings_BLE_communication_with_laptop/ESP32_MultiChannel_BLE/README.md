@@ -34,7 +34,7 @@ Place the input_data.npz file in the same directory as PlotGraph.py.
 - Python 3.7+ with the following installed:
   - `bleak` (Python BLE library)
   - `numpy` (for saving data)
-- Ensure Python packages like asyncio, numpy, tkinter, matplotlib, and threading are installed.
+- Ensure Python packages like asyncio, numpy, tkinter, matplotlib, and threading are installed in PyCharm.
   `pip install bleak numpy matplotlib`
 
 ## Usage Instructions
@@ -76,8 +76,8 @@ Figure: Output for ESP32_MultiChannel_BLE.ino in Arduino IDE.
 
 ![image](https://github.com/user-attachments/assets/5b5c8dd7-9db4-4875-a4f4-b1ec18e5f7ae)
 
-Figure: Output for ConnectToESP32.py in Visual Studio Code.
+Figure: Output for ConnectToESP32.py.
 
 ![image](https://github.com/user-attachments/assets/68eec393-f5ee-42b3-a0f7-db8e0e0fb0fb)
 
-Figure: Output for PlotGraph.py in Visual Studio Code.
+Figure: Output for PlotGraph.py.
