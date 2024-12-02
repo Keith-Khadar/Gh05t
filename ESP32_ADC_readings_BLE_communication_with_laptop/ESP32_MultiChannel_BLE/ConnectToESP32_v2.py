@@ -89,7 +89,7 @@ def read_and_plot_data_from_csv(file_path):
         # Plot each column as a separate line
         plt.figure(figsize=(10, 6))
         for i, column in enumerate(data_columns):
-            plt.plot(range(len(column)), column, marker='o', linestyle='-', label=f"Column {i + 1}")
+            plt.plot(range(len(column)), column, marker='o', linestyle='-', label=f"Channel {i + 1}")
 
         plt.title("Multi-Dimensional Data from BLE Device")
         plt.xlabel("Reading Index")
