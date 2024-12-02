@@ -1,7 +1,6 @@
 # Real-Time EEG Visualization GUI
 
 ## Overview
----
 
 The Graphic User Interface (GUI) is a Python-based real-time visualization tool for viewing multi-channel EEG data over Bluetooth from an ESP32-C6 microcontroller. 
 
@@ -26,7 +25,6 @@ The Graphic User Interface (GUI) is a Python-based real-time visualization tool 
    ```
 
 ## Setup Instructions
----
 
 ### 1. ESP32-C6 Setup
 
@@ -54,7 +52,6 @@ python gui.py
 ```
 
 ## Code Architecture
----
 
 - **`gui.py`**: Main script for the GUI.
 - **`utils/`**: Folder containing all the helper classes and functions.
@@ -70,7 +67,6 @@ python gui.py
 - The ESP32-C6 needs to have code uploaded everytime the BLE server shuts down. After 1-2 minutes idle, the BLE server will stop showing to the scanners. This requires reuploading the code. 
 
 ## Future Work
----
 
 - The GUI can currently only read from .edf files when uploading. Future work would include expanding the capabilities to .csv, .dat, and .txt files. 
 - Apply ability for the user to change the layout or types of plots shown.
