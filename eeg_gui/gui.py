@@ -39,6 +39,7 @@ class EEGVisualizer:
         self.main_frame.grid_rowconfigure(1, weight=3)
 
         self.eeg_data = None
+        self.ble_eeg_data = np.empty((0, 8), dtype=np.uint8)
         self.sampling_rate = 1000
         self.start_datetime = 0
 
@@ -94,17 +95,6 @@ class EEGVisualizer:
             except Exception as e:
                 tk.messagebox.showerror("Error", f"Failed to load EEG data: {str(e)}")
 
-    def on_eeg_data_received(self, sender, data):
-        new_data = np.frombuffer(data, dtype=np.uint8)
-        print(new_data)
-
-        if self.eeg_data is None:
-            self.eeg_data = [new_data]
-        else:
-            self.eeg_data.append(new_data)
-
-        self.update_eeg_plot()
-
     def generate_dummy_data(self):
         self.sampling_rate = 1000
         num_samples = 1000
@@ -116,9 +106,9 @@ class EEGVisualizer:
         def create_waveform_frequency_ratio():
             if self.is_bluetooth:
                 self.eeg_data = []
-                self.waveform = Waveform(self.main_frame, self.eeg_data, 1, self.start_datetime)
-                self.frequency = Frequency(self.main_frame, self.eeg_data, 1, self.start_datetime)
-                self.ratio = Ratio(self.main_frame, self.eeg_data, 1, self.start_datetime)
+                self.waveform = Waveform(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
+                self.frequency = Frequency(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
+                self.ratio = Ratio(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
             else:
                 if self.eeg_data is not None:
                     self.waveform = Waveform(self.main_frame, self.eeg_data, self.sampling_rate, self.start_datetime)
@@ -145,15 +135,13 @@ class EEGVisualizer:
             self.clear_plots()
 
     async def start_ble_connection(self):
-        self.eeg_ble = EEGBLE(self.on_eeg_data_received)
+        self.eeg_ble = EEGBLE(self, self.ble_eeg_data)
+        await self.eeg_ble.connect()
         self.process_and_visualize_eeg_data()
-
         self.is_connected = True
-        await self.eeg_ble.start_notifications()
 
     async def stop_ble_connection(self):
         if self.is_connected:
-            await self.eeg_ble.stop_notifications()
             await self.eeg_ble.disconnect()
             self.is_connected = False
 

@@ -67,7 +67,7 @@ python gui.py
 
 ## Troubleshooting
 ---
-- There is no recorded bugs.
+- The ESP32-C6 needs to have code uploaded everytime the BLE server shuts down. After 1-2 minutes idle, the BLE server will stop showing to the scanners. This requires reuploading the code. 
 
 ## Future Work
 ---
