@@ -15,10 +15,11 @@ Figure: The circuit design for testing the code. (The breadboard has been exclud
 
 ## Files
 1. **ESP32_MultiChannel_BLE.ino**  : Reads analog signals from three channels,convert the readings into voltage value and sends the voltage values via a BLE characteristic.
-2. **ConnectToESP32.py**  : Scans for the ESP32 BLE device, connects and reads BLE data from the ESP32 and then saves the received data to an `.npz` file for later use.
-3. **input_data.npz**  : Contains the ESP32 BLE transmitted data.
+2. **ConnectToESP32.py**  : Scans for the ESP32 BLE device, connects and reads BLE data from the ESP32 and then saves the received data to an `.npz` file for further use.
+3. **input_data.npz, input_data.csv**  : Contains the ESP32 BLE transmitted data.
 4. **PlotGraph.py**  : Reads input_data.npz, processes the data for three channels, and visualizes it live in a Tkinter GUI using Matplotlib.
-Place the input_data.npz file in the same directory as PlotGraph.py.
+5. **ConnectToESP32_v2.py**  : Scans for the ESP32 BLE device, connects and reads BLE data from the ESP32 and then saves the received data to an `.csv` file and plots a graph.
+Place the input_data.npz, input_data.csv  file in the same directory as PlotGraph.py.
 
 ## Prerequisites
 
@@ -36,13 +37,14 @@ Place the input_data.npz file in the same directory as PlotGraph.py.
   - `bleak` (Python BLE library)
   - `numpy` (for saving data)
 - Ensure Python packages like asyncio, numpy, tkinter, matplotlib, and threading are installed.
-`pip install numpy
+  
+`pip install numpy`
 
-pip install matplotlib
+`pip install matplotlib`
 
-sudo apt-get install python3-tk
+`sudo apt-get install python3-tk`
 
-pip install bleak`
+`pip install bleak`
 
 ## Usage Instructions
 
@@ -55,6 +57,7 @@ pip install bleak`
 - Run the following command after loading the ESP32 board with the ESP32_MultiChannel_BLE.ino program using Arduino IDE.
 - Run the Python script:
   `python3 ConnectToESP32.py`
+- Note: The csv version of this code can be run using `python3 ConnectToESP32_v2.py` and omit the third step.
 - The ConnectToESP32.py script will:
   1. Scan for the ESP32 by its BLE name.
   2. Connect and read voltage values from the BLE characteristic.
