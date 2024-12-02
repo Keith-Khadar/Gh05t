@@ -63,7 +63,6 @@ python gui.py
 - **`requirements.txt`**: List of required Python libraries.
 
 ## Troubleshooting
----
 - The ESP32-C6 needs to have code uploaded everytime the BLE server shuts down. After 1-2 minutes idle, the BLE server will stop showing to the scanners. This requires reuploading the code. 
 - BLE disconnection takes a long time to fully process, making the GUI become extremely slow. 
 
