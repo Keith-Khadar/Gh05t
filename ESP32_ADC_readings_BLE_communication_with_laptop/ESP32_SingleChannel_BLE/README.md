@@ -61,6 +61,7 @@ Figure: The circuit design for testing the code. (The breadboard has been exclud
 - VS Code/ PyCharm
 - Python 3.7+ with the following installed:
   `bleak` (Python BLE library)
+  `pip install bleak`
 
 ## Commands
 Run the following command after loading the ESP32 board with the program ESP32_SingleChannel_BLE.ino using Arduino IDE:
