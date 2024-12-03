@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import asyncio
 import threading
+import time
 from utils import Waveform, Frequency, Ratio, EEGBLE
 from bleak import BleakClient, logging
 import pyedflib # edf support
@@ -48,6 +49,8 @@ class EEGVisualizer:
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.after_id = None
+
+        self.waveform = None
 
         self.loop = asyncio.new_event_loop()
         self.root.after(100, self.run_asyncio_event_loop)
@@ -106,12 +109,13 @@ class EEGVisualizer:
         def create_waveform_frequency_ratio():
             if self.is_bluetooth:
                 self.eeg_data = []
-                self.waveform = Waveform(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
-                self.frequency = Frequency(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
-                self.ratio = Ratio(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
+                time.sleep(5)
+                self.waveform = Waveform(self.main_frame, self.ble_eeg_data, 1, self.start_datetime, True)
+                # self.frequency = Frequency(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
+                # self.ratio = Ratio(self.main_frame, self.ble_eeg_data, 1, self.start_datetime)
             else:
                 if self.eeg_data is not None:
-                    self.waveform = Waveform(self.main_frame, self.eeg_data, self.sampling_rate, self.start_datetime)
+                    self.waveform = Waveform(self.main_frame, self.eeg_data, self.sampling_rate, self.start_datetime, False)
                     self.frequency = Frequency(self.main_frame, self.eeg_data, self.sampling_rate, self.start_datetime)
                     self.ratio = Ratio(self.main_frame, self.eeg_data, self.sampling_rate, self.start_datetime)
         
@@ -135,10 +139,17 @@ class EEGVisualizer:
             self.clear_plots()
 
     async def start_ble_connection(self):
-        self.eeg_ble = EEGBLE(self, self.ble_eeg_data)
+        self.eeg_ble = EEGBLE(self.on_eeg_data_received)
         await self.eeg_ble.connect()
         self.process_and_visualize_eeg_data()
         self.is_connected = True
+
+    async def on_eeg_data_received(self, sender: int, data: bytearray):
+        eeg_data = np.frombuffer(data, dtype=np.uint8)
+        self.ble_eeg_data = np.vstack([self.ble_eeg_data, eeg_data])
+        if self.waveform is not None:
+            self.waveform.update_data(self.ble_eeg_data)
+        # print(f"Received EEG data: {eeg_data}")
 
     async def stop_ble_connection(self):
         if self.is_connected:
@@ -147,7 +158,7 @@ class EEGVisualizer:
 
     def on_close(self):
         if self.is_bluetooth:
-            asyncio.run(self.stop_ble_connection())
+            self.loop.create_task(self.stop_ble_connection())
         self.root.quit()
 
     def run_asyncio_event_loop(self):

@@ -5,10 +5,11 @@ import pandas as pd
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider
+from utils.bleak_connect import EEGBLE
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Waveform:
-    def __init__(self, main_frame, eeg_data, sampling_rate, start_datetime):
+    def __init__(self, main_frame, eeg_data, sampling_rate, start_datetime, ble):
         
         self.start_index = 1
         self.time_window = 5
@@ -34,7 +35,10 @@ class Waveform:
         self.eeg_fig.canvas.mpl_connect('motion_notify_event', self.on_mouse_move)
         self.eeg_fig.canvas.mpl_connect('button_release_event', self.on_release)
 
-        self.update_eeg_plot()
+        if (ble == False):
+            self.update_eeg_plot()
+        else:
+            self.main_frame.after(2000, self.periodic_update)
 
     def update_eeg_plot(self, event=None):
         if isinstance(self.eeg_data, list) and len(self.eeg_data) > 0:
@@ -176,6 +180,61 @@ class Waveform:
 
         self.update_eeg_plot()
 
+    def update_realtime_plot(self, shared_data):
+        if isinstance(shared_data, np.ndarray) and shared_data.shape[1] == 8:
+            self.eeg_data = shared_data
+
+        end_index = self.start_index + self.num_samples_per_window
+
+        if end_index > self.eeg_data.shape[0]:
+            end_index = self.eeg_data.shape[0]
+
+        if end_index < self.start_index:
+            window_data = np.vstack([self.eeg_data[self.start_index:], self.eeg_data[:end_index]])
+        else:
+            window_data = self.eeg_data[self.start_index:end_index]
+
+        time_axis = np.linspace(0, self.time_window, window_data.shape[0])
+
+        self.eeg_ax.cla()
+
+        for i in range(8):
+            channel_data = window_data[:, i]
+            
+            if len(channel_data) != len(time_axis):
+                print(f"Mismatch: time_axis length {len(time_axis)} and channel_data length {len(channel_data)}")
+                continue
+
+            self.eeg_ax.plot(time_axis, channel_data + i * 100, label=f'Channel {i + 1}', color=f'C{i}')
+
+        start_time_seconds = self.start_index / self.sampling_rate
+        if isinstance(self.start_datetime, int):
+            self.start_datetime = datetime.fromtimestamp(self.start_datetime)
+        
+        current_datetime = self.start_datetime + timedelta(seconds=start_time_seconds)
+        self.eeg_ax.set_title(f"Real-Time EEG Data from {current_datetime.strftime('%H:%M:%S')}")
+        self.eeg_ax.set_ylabel("Channels")
+        self.eeg_ax.set_xlabel("Time (s)")
+        self.eeg_ax.grid(True)
+
+        y_ticks = [i * 100 for i in range(8)]
+        y_labels = [f'CH {i + 1}' for i in range(8)]
+        self.eeg_ax.set_yticks(y_ticks)
+        self.eeg_ax.set_yticklabels(y_labels)
+
+        self.eeg_canvas.draw()
+
+    def periodic_update(self):
+        if self.eeg_data.size > 0:
+            self.update_realtime_plot(self.eeg_data)
+
+        self.start_index = (self.start_index + self.num_samples_per_window) % self.eeg_data.shape[0]
+
+        self.main_frame.after(100, lambda: self.periodic_update())
+
+    def update_data(self, new_data):
+        self.eeg_data = np.vstack([self.eeg_data, new_data])
+
     def clear_plot(self):
-        self.eeg_ax.cla() # Clear the plot
+        self.eeg_ax.cla()
         self.eeg_canvas.draw()

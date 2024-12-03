@@ -15,10 +15,9 @@ logging.basicConfig(level=logging.INFO)
 bleak_logger = logging.getLogger(__name__) # 
 
 class EEGBLE:
-    def __init__(self, shared_eeg, callback=None):
+    def __init__(self, notification_callback):
         self.client = None
-        self.shared_eeg = shared_eeg
-        self.data_callback = callback
+        self.notification_callback = notification_callback
 
     async def connect(self):
         bleak_logger.info("Scanning for devices...")
@@ -46,18 +45,18 @@ class EEGBLE:
 
             bleak_logger.info("Connected successfully!")
             
-            services = await self.client.get_services()
-            for service in services:
-                if service.uuid == SERVICE_UUID:
-                    print(f"Found Service: {service.uuid}")
-                    for char in service.characteristics:
-                        print(f"  Characteristic: {char.uuid} | Properties: {char.properties}")
-                        if char.uuid == CHARACTERISTIC_UUID and "notify" in char.properties:
-                            break
-                    else:
-                        raise ValueError(f"Characteristic {CHARACTERISTIC_UUID} not found or does not support notifications.")
+            # services = await self.client.get_services()
+            # for service in services:
+            #     if service.uuid == SERVICE_UUID:
+            #         print(f"Found Service: {service.uuid}")
+            #         for char in service.characteristics:
+            #             print(f"  Characteristic: {char.uuid} | Properties: {char.properties}")
+            #             if char.uuid == CHARACTERISTIC_UUID and "notify" in char.properties:
+            #                 break
+            #         else:
+            #             raise ValueError(f"Characteristic {CHARACTERISTIC_UUID} not found or does not support notifications.")
             
-            await self.client.start_notify(CHARACTERISTIC_UUID, self.on_eeg_data_received)
+            await self.client.start_notify(CHARACTERISTIC_UUID, self.notification_callback)
             print("Notifications enabled.")
 
         except Exception as e:
@@ -86,7 +85,5 @@ class EEGBLE:
 
         print("Disconnected successfully!")
 
-    def on_eeg_data_received(self, sender: int, data: bytearray):
-        eeg_data = np.frombuffer(data, dtype=np.uint8)
-        self.shared_eeg = np.vstack([self.shared_eeg, eeg_data])
-        print(f"Received EEG data: {eeg_data}")
+    def get_shared_data(self):
+        return self.shared_eeg
