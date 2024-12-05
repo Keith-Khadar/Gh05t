@@ -20,13 +20,14 @@ The Graphic User Interface (GUI) is a Python-based real-time visualization tool 
 3. **Libraries**
     - Install Python libraries using:
 
-    ```bash
-   pip install bleak matplotlib numpy
-   ```
+```bash
+pip install bleak matplotlib numpy
+```
 
 ## Setup Instructions
 
 ### 1. ESP32-C6 Setup
+Flash the ```bash esp32_ble_eeg.ino``` program to the ESP32-C6 board using either Arduino IDE or PlatformIO. Ensure the output of the ESP32-C6 reports the BLE server broadcasting.
 
 ### 2. Clone the Repository
 Clone the respository with GUI code
@@ -45,7 +46,7 @@ CHARACTERISTIC_UUID = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" # Replace with ESP3
 ```
 
 ### 4. Run the GUI
-Ensure the computer is connected to the ESP32-C6 via bluetooth and run the main script to start the GUI:
+Run the main script to start the GUI. The python script will scan for bluetooth devices automatically when the option is selected.
 
 ```bash
 python gui.py
@@ -63,12 +64,13 @@ python gui.py
 - **`requirements.txt`**: List of required Python libraries.
 
 ## Troubleshooting
-- The ESP32-C6 needs to have code uploaded everytime the BLE server shuts down. After 1-2 minutes idle, the BLE server will stop showing to the scanners. This requires reuploading the code. 
+- The clear button does not clear the plots when connected over Bluetooth.
 
 ## Future Work
 
 - The GUI can currently only read from .edf files when uploading. Future work would include expanding the capabilities to .csv, .dat, and .txt files. 
 - Apply ability for the user to change the layout or types of plots shown.
 - Add the capability to import ML model to plot markers or notes on the waveform.
-- When connected to bluetooth, only the waveform plot uses the information in real-time. The frequency and topomap needs to also be updated. 
+- When connected to bluetooth, only the waveform plot uses the information in real-time. The frequency and topomap needs to also be updated.
+- The EEG topography map is not connected to real information. In the future, this will be show the real locations of the electrodes on the headset and determine the contour lines/distribution frequency on the head. 
 
