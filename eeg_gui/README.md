@@ -27,7 +27,7 @@ pip install bleak matplotlib numpy
 ## Setup Instructions
 
 ### 1. ESP32-C6 Setup
-Flash the ```bash esp32_ble_eeg.ino``` program to the ESP32-C6 board using either Arduino IDE or PlatformIO. Ensure the output of the ESP32-C6 reports the BLE server broadcasting.
+Flash the ```esp32_ble_eeg.ino``` program to the ESP32-C6 board using either Arduino IDE or PlatformIO. Ensure the output of the ESP32-C6 reports the BLE server broadcasting.
 
 ### 2. Clone the Repository
 Clone the respository with GUI code
