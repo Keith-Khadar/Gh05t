@@ -29,12 +29,12 @@ The architecture of the project is structured as follows:
 ### **Software**:
 ---
 ![GH05t_Software](https://github.com/user-attachments/assets/494d2cf8-fc81-4a13-91d9-89d26b5bed49)
-- **BLE**: Serialized communication over bluetooth from the Xiao ESP32-C6 to the computer with the GUI or ML model for training.
+- **BLE(Bluetooth Low Energy)**: Serialized communication over bluetooth from the Xiao ESP32-C6 to the computer with the GUI or ML model for training.
 - **GUI**:
   - Framework:
     - [tkinter](https://docs.python.org/3/library/tkinter.html) & [Matplotlib](https://matplotlib.org/): EEG Graphical User Interface
     - [Bleak](https://pypi.org/project/bleak/): Bluetooth interface library for python
-    - [EEGLib](https://eeglib.readthedocs.io/en/latest/index.html): Python library designed for analyzing and processing EEG data.
+    - [EEGLib](https://eeglib.readthedocs.io/en/latest/index.html): Python library designed for analyzing and processing EEG data
   - Features:
     - Real-time data streaming from Xiao ESP32-C6
     - Ability to upload pre-recorded EEG files, edf
