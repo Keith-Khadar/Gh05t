@@ -9,7 +9,7 @@ This project aims to design and develop an EEG headset. The headset will have a 
 - **Custom Headset**: Design in progress
 - **Custom Electrodes**: Preliminary testing complete - redesign required
 - **Custom PCB Breakout Board**: WIP - Schematic complete, Layout in Progress
-- **Bluetooth Communication**: Demonstrates multichannel data acquisition from an ESP32-C6 board, transmitted via BLE to a laptop, stored in an `.npz` file, and visualized through a plot as proof of concept.
+- **Bluetooth Communication**: Demonstrates multichannel data acquisition from an ESP32-C6 board, transmitted via BLE to a laptop, stored in an `.npz` or `.csv` file, and visualized through a plot as proof of concept.
 - **Front End Gui**: Proof of concept complete
 - **Pose Machine Learning Model**: Proof of concept complete - Refinement Needed
 - **EEG Machine Learning Model**: Research phase
