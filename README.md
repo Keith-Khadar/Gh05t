@@ -55,6 +55,7 @@ The architecture of the project is structured as follows:
   - Frameworks:
     - [tkinter](https://docs.python.org/3/library/tkinter.html) & [Matplotlib](https://matplotlib.org/): EEG Graphical User Interface
     - [Bleak](https://pypi.org/project/bleak/): Bluetooth interface library for python
+    - [EEGLib](https://eeglib.readthedocs.io/en/latest/index.html): Python library designed for analyzing and processing EEG data.
   - Key Components:
     - Raw electrode data stream
     - Frequency wave analysis
