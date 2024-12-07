@@ -70,13 +70,19 @@ The architecture of the project is structured as follows:
 - **3D Printing Fail**: Weak legs on 3D electrodes
   - The initial model found and used for the electrodes has spindly legs. In combination with two snaps of the filament during printing, the legs were incredibly weak and many snapped during removal from the print bed.
   - Fix: Load filament onto spool to eliminate snapping during print. Custom design electrodes with filleted legs to enhance their strength. Increase the number of walls when slicing model for printing.
+  - Above fix solved combined with printing on a higher quality printer and in a different orientation fixed the issues. 
 - **Snap Plating**: Purchased snaps are covered in non-conductive coating
   - Prevented soldering, but can be scrapped off with a knife.
   - Reduces signal integritty of electrodes.
   - Fix: Looking into alternative unplated snap connectors.
+  - Above fix solves the issue in initial testing. Will continue to monitor as further testing is conducted.
 - **Inaccurate EEG Data**: Data recorded during initial testing is inaccurate.
   - The poor quality electrodes(see snap plating challenge & 3d printing fail) as well as the ADC optimized for Electromyography (EMG) data recording instead of the use case of Electroencephalography (EEG), resulted in poor quality data.
   - Fix: Custom designed PCB breakout board for the ADS1299 which is designed for EEG data acquisition.
+  - Update: Fix in progress
+- **Reflow Issus**: Solder pads bridged during reflow of PCB.
+  - Fix: Use flux and a hand solder iron to fix individual pads OR reattempt the reflow.
+  - Update: Fix in progress
 
 ## License
 
