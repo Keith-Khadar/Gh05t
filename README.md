@@ -8,7 +8,7 @@ This project aims to design and develop an EEG headset. The headset will have a 
 
 - **Custom Headset**: Design in progress
 - **Custom Electrodes**: Preliminary testing complete - redesign required
-- **Custom PCB Breakout Board**: WIP - Schematic complete, Layout in Progress
+- **Custom PCB Breakout Board**: WIP - Schematic and layout complete, soldering in progress
 - **Bluetooth Communication**: Demonstrates multichannel data acquisition from an ESP32-C6 board, transmitted via BLE to a laptop, stored in an `.npz` or `.csv` file, and visualized through a plot as proof of concept.
 - **Front End Gui**: Proof of concept complete
 - **Pose Machine Learning Model**: Proof of concept complete - Refinement Needed
@@ -18,18 +18,29 @@ This project aims to design and develop an EEG headset. The headset will have a 
 
 The architecture of the project is structured as follows:
 
-- **Hardware**:
-  - CAD: Custom electrodes made from conductive PLA
-  - PCB: Custom breakout board for ADS1299 ADC
-  - Components: ESP32 (Seeed Studio XIAO ESP32C6), LiPo Battery
+![GH05T_Architecture](https://github.com/user-attachments/assets/8cabfe92-2fb6-45d9-b9c0-2a09e933ab1f)
+### **Hardware**:
+---
+![GH05T_Hardware](https://github.com/user-attachments/assets/a39db358-9035-4293-9c11-b8de8aaff7cf)
+- **CAD**: Custom electrodes made from conductive PLA
+- **PCB**: Custom breakout board for ADS1299 ADC
+- **Components**: ESP32 (Seeed Studio XIAO ESP32C6), LiPo Battery
 
-- **Firmware**:
-  - ESP32 Firmware: Interfaces with the ADS1299 and ML model/GUI on seperate machine
-  
-- **Communication API**:
-  - Format: Serial Communication(Bluetooth Classic) || Server Communication(BLE)
-  - Structure: Undecided
-
+### **Software**:
+---
+![GH05t_Software](https://github.com/user-attachments/assets/494d2cf8-fc81-4a13-91d9-89d26b5bed49)
+- **BLE**: Serialized communication over bluetooth from the Xiao ESP32-C6 to the computer with the GUI or ML model for training.
+- **GUI**:
+  - Framework:
+    - [tkinter](https://docs.python.org/3/library/tkinter.html) & [Matplotlib](https://matplotlib.org/): EEG Graphical User Interface
+    - [Bleak](https://pypi.org/project/bleak/): Bluetooth interface library for python
+    - [EEGLib](https://eeglib.readthedocs.io/en/latest/index.html): Python library designed for analyzing and processing EEG data.
+  - Features:
+    - Real-time data streaming from Xiao ESP32-C6
+    - Ability to upload pre-recorded EEG files, edf
+    - Visualize EEG data in a time, frequency, and electrode topography map
+  - Styling: WIP
+ 
 - **EEG Signal Pre-processing**:
   - Format:
     - Input: Raw 4 channel electrode data
@@ -50,17 +61,6 @@ The architecture of the project is structured as follows:
     - Structure: Artifical Neural Network (Regressor)
     - Pre-Training: PCA-Pretraining for optimal features
     - Training: Network Tuning based on Target Data
-
-- **Frontend**:
-  - Frameworks:
-    - [tkinter](https://docs.python.org/3/library/tkinter.html) & [Matplotlib](https://matplotlib.org/): EEG Graphical User Interface
-    - [Bleak](https://pypi.org/project/bleak/): Bluetooth interface library for python
-    - [EEGLib](https://eeglib.readthedocs.io/en/latest/index.html): Python library designed for analyzing and processing EEG data.
-  - Key Components:
-    - Raw electrode data stream
-    - Frequency wave analysis
-    - Wave type distribution
-  - Styling: WIP
 
 ## Known Bugs
 
