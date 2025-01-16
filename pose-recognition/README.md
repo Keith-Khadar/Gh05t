@@ -93,3 +93,9 @@ To run the motion estimation program:
 ```
 python demo/motion_estimation.py
 ```
+
+## TODO:
+
+1) Explicitly make a version that does not display the estimation in real-time.
+2) Investigate potential inference speed-up opportunities.
+3) Investigate conditions for optimal performance. 
