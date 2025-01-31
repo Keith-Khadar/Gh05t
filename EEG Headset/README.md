@@ -18,11 +18,12 @@ Material- PLA (Polylactic Acid)
 Print settings-
 * Infill density: 15%
 * Support overhang angle: 60.0
+
 * Build plate adhesion: Brim (for halves of the headset) or Skirt (for all other components)
 
 
 ## Materials
-EEG Headset Shell (2 halves)
+EEG Headset Frame (2 halves)
 Spring fittings (x 10)
 Snap-buttons (x 12) 
 Electrode holders (x 10)
@@ -36,14 +37,17 @@ Wire clipper for removing the excess support prints especially from the EEG head
 
 ## Assembly Instructions
 1) Print all above components.
+![IMG_20241218_110856440](https://github.com/user-attachments/assets/7973ac54-1a3d-400e-8f54-58e8113e2540)
 2) Ensure that any excess printed support structures have been remove from the headset halves, and that all rough edges are sanded smooth for comfort. 
    Test the fit of the halves before proceeding to ensure they align properly and then glue them together.
 3) Glue the hexagonal fitting into the designated slots on the inside of the headset at appropriate positions ().
 4) Take the spring fittings and screw them into the fastening screws. These springs once positioned securely, will provide the adjustable fit for the headset.
 5) Now, push the wider side of the electrode holder in the fastening screw against the spring from the inner side of the headset.
 6) Glue the snap buttons to the electrode holder with the finer end protruding outward and the flat end soldered to a mulit-strand copper wire.
+![IMG_20241218_112913297](https://github.com/user-attachments/assets/6472966a-4cbd-4cc3-b648-91a97236bb8d)
 7) Each copper wire is in turn soldered to one end of the jumper wire, the other end is attached to the headers on the board.
 8) Attach wire clip to minimize tangling of the wires.
+![IMG_20250122_214925864](https://github.com/user-attachments/assets/60e6182e-b3c2-49ec-8db9-3df36d83b465)
 
 ## Usage Guidelines
 Adjust the headset for a snug but comfortable fit.
