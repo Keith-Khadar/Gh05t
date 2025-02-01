@@ -18,21 +18,21 @@ This project aims to design and develop an EEG headset. The headset will have a 
 
 The architecture of the project is structured as follows:
 
-![GH05T_Architecture](https://github.com/user-attachments/assets/8cabfe92-2fb6-45d9-b9c0-2a09e933ab1f)
+![Hardware-Software](https://github.com/user-attachments/assets/705bc7bb-a8fa-4fce-9722-92c0d27d7380)
 ### **Hardware**:
 ---
-![GH05T_Hardware](https://github.com/user-attachments/assets/a39db358-9035-4293-9c11-b8de8aaff7cf)
+![Hardware-BW](https://github.com/user-attachments/assets/bdf0e11a-a4b8-47f4-939d-c2bc4e411c97)
 - **CAD**: Custom electrodes made from conductive PLA
 - **PCB**: Custom breakout board for ADS1299 ADC
 - **Components**: ESP32 (Seeed Studio XIAO ESP32C6), Voltage Booster, LiPo Battery
 
 ### **Software**:
 ---
-![GH05t_Software](https://github.com/user-attachments/assets/494d2cf8-fc81-4a13-91d9-89d26b5bed49)
+![Software](https://github.com/user-attachments/assets/efba03f7-ca59-4ab1-9369-d4da20a4409f)
 - **BLE(Bluetooth Low Energy)**: Serialized communication over bluetooth from the Xiao ESP32-C6 to the computer with the GUI or ML model for training.
 - **GUI**:
   - Framework:
-    - [tkinter](https://docs.python.org/3/library/tkinter.html) & [Matplotlib](https://matplotlib.org/): EEG Graphical User Interface
+    - [PyQt](https://docs.python.org/3/library/tkinter.html](https://doc.qt.io/qtforpython-6/) & [Matplotlib](https://matplotlib.org/): EEG Graphical User Interface
     - [Bleak](https://pypi.org/project/bleak/): Bluetooth interface library for python
     - [EEGLib](https://eeglib.readthedocs.io/en/latest/index.html): Python library designed for analyzing and processing EEG data
   - Features:
