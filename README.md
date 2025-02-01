@@ -84,6 +84,9 @@ The architecture of the project is structured as follows:
 - **Reflow Issus**: Solder pads bridged during reflow of PCB.
   - Fix: Use flux and a hand solder iron to fix individual pads OR reattempt the reflow.
   - Update: Fix in progress
+- **PCB Data Collection**: Unable to reliably collect data through SPI from the PCB breakout board.
+  - The ADS1299 breakout board fails to reliably begin data collection/transmission when request through the Start pin. Data collection occasionally can be started by connecting the Start and Reset pins, but this is highly inconsistent.
+  - Update: More testing in progress
 
 ## License
 
