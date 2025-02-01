@@ -8,7 +8,7 @@ This project aims to design and develop an EEG headset. The headset will have a 
 
 - **Custom Headset**: Design in progress
 - **Custom Electrodes**: Preliminary testing complete - redesign required
-- **Custom PCB Breakout Board**: WIP - Schematic and layout complete, soldering in progress
+- **Custom PCB Breakout Board**: Schematic and layout complete, assembly complete, testing in progress
 - **Bluetooth Communication**: Demonstrates multichannel data acquisition from an ESP32-C6 board, transmitted via BLE to a laptop, stored in an `.npz` or `.csv` file, and visualized through a plot as proof of concept.
 - **Front End Gui**: Proof of concept complete
 - **Pose Machine Learning Model**: Proof of concept complete - Refinement Needed
@@ -24,7 +24,7 @@ The architecture of the project is structured as follows:
 ![GH05T_Hardware](https://github.com/user-attachments/assets/a39db358-9035-4293-9c11-b8de8aaff7cf)
 - **CAD**: Custom electrodes made from conductive PLA
 - **PCB**: Custom breakout board for ADS1299 ADC
-- **Components**: ESP32 (Seeed Studio XIAO ESP32C6), LiPo Battery
+- **Components**: ESP32 (Seeed Studio XIAO ESP32C6), Voltage Booster, LiPo Battery
 
 ### **Software**:
 ---
