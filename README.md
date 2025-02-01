@@ -86,6 +86,10 @@ The architecture of the project is structured as follows:
   - Update: Fix in progress
 - **PCB Data Collection**: Unable to reliably collect data through SPI from the PCB breakout board.
   - The ADS1299 breakout board fails to reliably begin data collection/transmission when request through the Start pin. Data collection occasionally can be started by connecting the Start and Reset pins, but this is highly inconsistent.
+  - ![ADC1299_Broken_SPI_preview](https://github.com/user-attachments/assets/be724802-56d3-415d-a1eb-c849aed67581)
+  - ![PXL_20250123_070744900_preview](https://github.com/user-attachments/assets/c2920eb8-0c84-43f2-9cb7-0c4df5120fee)
+
+
   - Update: More testing in progress
 
 ## License
