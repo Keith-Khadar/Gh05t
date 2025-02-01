@@ -40,7 +40,7 @@ Wire clipper for removing the excess support prints especially from the EEG head
 ![IMG_20241218_110856440](https://github.com/user-attachments/assets/7973ac54-1a3d-400e-8f54-58e8113e2540)
 2) Ensure that any excess printed support structures have been remove from the headset halves, and that all rough edges are sanded smooth for comfort. 
    Test the fit of the halves before proceeding to ensure they align properly and then glue them together.
-3) Glue the hexagonal fitting into the designated slots on the inside of the headset at appropriate positions ().
+3) Glue the hexagonal fitting into the designated slots on the inside of the headset at appropriate positions according to the 10-20 system (FP1, FP2, C3, C4, P7, P8, 01, 02).
 4) Take the spring fittings and screw them into the fastening screws. These springs once positioned securely, will provide the adjustable fit for the headset.
 5) Now, push the wider side of the electrode holder in the fastening screw against the spring from the inner side of the headset.
 6) Glue the snap buttons to the electrode holder with the finer end protruding outward and the flat end soldered to a mulit-strand copper wire.
