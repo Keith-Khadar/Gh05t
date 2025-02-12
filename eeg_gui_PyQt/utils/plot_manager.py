@@ -1,41 +1,32 @@
-from PyQt5.QtWidgets import QVBoxLayout, QGridLayout, QWidget, QProgressBar
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from PyQt5.QtWidgets import QProgressBar, QSizePolicy
 import numpy as np
 from matplotlib.collections import LineCollection
 import matplotlib.animation as animation
-from utils.grid_manager import GridManager
 
 class PlotManager:
     def __init__(self, window):
         self.window = window
-
-        self.grid_layout = QGridLayout()
-        self.window.setLayout(self.grid_layout)
-
-        self.plots = {}
-
         self.figure = Figure()
         self.canvas = FigureCanvas(self.figure)
+        self.canvas.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.ax = self.figure.add_subplot(111)
-        
-        self.data = None
-        self.plot_type = "time"
-        self.title = self.ax.set_title("")
-        self.anim = None
-        self.offset = 0
-        self.dt = 0
-        self.n_plot = 0
-        self.sigbufs_plot = None
-        self.channel_names = []
+        self.plot_type = "Time Series"
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setMinimum(0)
         self.progress_bar.setValue(0)
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.canvas)
-        self.window.setLayout(layout)
+        self.data = np.zeros((8, 0))  # Initialize with 8 channels and no data
+        self.time = 0.0
+        self.channel_names = ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7", "Ch8"]
+
+        self.anim = None
+        self.offset = 0
+        self.dt = 0
+        self.n_plot = 2000  # Number of samples to display at a time
+        self.sigbufs_plot = None
 
     def stackplot(self, marray, seconds=None, start_time=None, ylabels=None, ax=None):
         """
@@ -61,7 +52,7 @@ class PlotManager:
 
         if ax is None:
             ax = self.ax
-        ax.clear() 
+        ax.clear()
         lines = LineCollection(segs, offsets=offsets, transOffset=None, colors='black')
         ax.add_collection(lines)
 
@@ -73,12 +64,10 @@ class PlotManager:
 
         self.figure.patch.set_alpha(0)
         self.canvas.setStyleSheet("background:#85a0bb;")
-        ax.set_facecolor((0, 0, 0, 0)) 
+        ax.set_facecolor((0, 0, 0, 0))
 
         ax.set_xlabel('Time (s)')
         self.canvas.draw()
-        self.window.addWidget(self.canvas)
-        self.window.setCurrentWidget(self.canvas)
 
     def update_progress_bar(self):
         """Update the progress bar based on the animation frame."""
@@ -86,21 +75,27 @@ class PlotManager:
         self.progress_bar.setValue(progress)
 
     def plot_data(self, data, time, channel_names=None, plot_type="Time Series"):
-        """Handles different types of plots."""
+        """Plot data based on the plot type."""
+        self.ax.clear()
         self.data = data
         self.plot_type = plot_type
         self.time = time[-1]
         self.channel_names = channel_names
-        
+
         if plot_type == "Time Series":
             if data.shape[0] > data.shape[1]:
                 data = data.T
             self.n_plot = min(data.shape[1], 2000)
             self.stackplot(data[:, :self.n_plot], seconds=time[-1], ylabels=self.channel_names)
         elif plot_type == "FFT":
-            self.plot_fft(data)
-        elif plot_type == "Topography":
-            self.plot_topography(data)
+            freqs = np.fft.fftfreq(data.shape[1], d=1/250)
+            fft_data = np.abs(np.fft.fft(data, axis=1))
+            for i, channel in enumerate(fft_data):
+                self.ax.plot(freqs, channel + i * 0.1, label=channel_names[i])
+            self.ax.set_xlabel("Frequency (Hz)")
+            self.ax.set_ylabel("Magnitude")
+            self.ax.legend()
+        self.canvas.draw()
 
     def plot_fft(self, data):
         """Plot FFT of the signals."""
@@ -119,18 +114,6 @@ class PlotManager:
         self.ax.imshow(data, aspect='auto', cmap='jet')
         self.ax.set_title("Topography")
         self.canvas.draw()
-
-    def update_grid_layout(self):
-        """Rearrange plots in grid layout."""
-        row, col = 1, 0
-        for plot_type, (_, canvas, _) in self.plots.items():
-            self.grid_layout.addWidget(canvas, row, col)
-            col += 1
-            if col >= 2:
-                row += 1
-                col = 0
-
-        self.window.setLayout(self.grid_layout)
 
     def animate(self, frame):
         """Update the plot for each frame of the animation and display the current time."""
@@ -174,3 +157,28 @@ class PlotManager:
             self.anim.event_source.stop()
             self.anim = None
             print("Animation stopped.")
+
+    def handle_real_time_data(self, new_data, timestamp):
+        """Handle incoming real-time data and update the plot dynamically."""
+        print(f"New data shape: {new_data.shape}")
+        if self.data.size == 0:
+            self.data = new_data
+        else:
+            self.data = np.hstack((self.data, new_data))
+
+        if self.data.shape[1] > self.n_plot:
+            self.data = self.data[:, -self.n_plot:]
+
+        if self.time_buffer.size == 0:
+            self.time_buffer = np.array([timestamp])
+        else:
+            self.time_buffer = np.hstack((self.time_buffer, timestamp))
+
+        if self.time_buffer.size > self.n_plot:
+            self.time_buffer = self.time_buffer[-self.n_plot:]
+
+        time_window = self.time_buffer[-1] - self.time_buffer[0] if self.time_buffer.size > 1 else 0
+
+        self.stackplot(self.data, seconds=time_window, ylabels=self.channel_names)
+        self.canvas.draw()
+        self.canvas.flush_events()

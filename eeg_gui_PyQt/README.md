@@ -2,14 +2,15 @@
 
 ## Overview
 
-The Graphic User Interface (GUI) is a Python-based real-time visualization tool for viewing multi-channel EEG data over Bluetooth from an ESP32-C6 microcontroller. 
+The Graphic User Interface (GUI) is a Python-based real-time visualization tool for viewing multi-channel EEG data over Bluetooth from an ESP32 microcontroller. 
 
 #### Features
 
 - **Real-Time Data Visualization**: Plots live EEG data for multitude of channels.
-- **BLE Connectivity**: Connects to an ESP32-C6 device via Bluetooth.
+- **BLE Connectivity**: Connects to an ESP32 device via Bluetooth.
 - **Read Pre-recorded files**: The GUI supports various file types: edf, csv, tsv, dat, and txt.
 - **Customizable GUI**: Easy to adapt for additional features like saving data or adjusting plot parameters.
+- **Export files**: Can export the data retrieved over BLE and provides the option to the user select file type.
 
 #### Dependencies
 1. **Hardware**
@@ -18,34 +19,17 @@ The Graphic User Interface (GUI) is a Python-based real-time visualization tool 
     - Python 3.7+
     - Bluetooth support on host computer
 3. **Libraries**
-    - Install Python libraries using:
-
-```bash
-pip install PyQt bleak matplotlib numpy
-```
+    - Refer to requirements.txt to install supporting Python libraries
 
 ## Setup Instructions
 
-### 1. ESP32-C6 Setup
-Flash the ```esp32_ble_eeg.ino``` program to the ESP32-C6 board using either Arduino IDE or PlatformIO. Ensure the output of the ESP32-C6 reports the BLE server broadcasting.
+### 1. ESP32 Setup
+Refer to the ESP32 folder, ```esp32\README.md```, for specific setup instructions
 
-### 2. Clone the Repository
-Clone the respository with GUI code
+### 2. Install Dependencies
+Using the requirements.txt, install the library dependencies required for the GUI to run for your environment.
 
-```bash
-git clone https://github.com/Keith-Khadar/Gh05t
-cd EEG_GUI_PYQT
-```
-
-### 3. Update Configuration
-Edit the `ble_manager_.py` file, under utils folder, to update the ESP32-C6 service and characteristic UUID:
-
-```python
-SERVICE_UUID = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"  # Replace with ESP32 Service UUID
-CHARACTERISTIC_UUID = "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX" # Replace with ESP32 Characteristic UUID
-```
-
-### 4. Run the GUI
+### 3. Run the GUI
 Run the main script to start the GUI. The python script will scan for bluetooth devices automatically when the option is selected.
 
 ```bash
@@ -56,18 +40,19 @@ python main.py
 
 - **`main.py`**: Main script for the GUI.
 - **`utils/`**: Folder containing all the helper classes and functions.
-  - **`ble_handler_.py`**: Creates client to recieve incoming information from the Xiao ESP32 BLE server.
+  - **`ble_handler_.py`**: Creates client to recieve incoming information from the ESP32 BLE server.
   - **`plot_manager.py`**: Plots various types of Graphs specified by the user.
-  - **`grid_manager.py`**: Controls the grid display of all the plots.
   - **`file_handler.py`**: Handles the file uploading, handling, and exporting for data. 
+- **`resource/`**: Contains any png or supporting files for the GUI
+- **`example_eeg_data/`**: Includes eeg data that can be used to test the visualizer.
+- **`test/`**: Contains all the unit testing for the GUI.
 - **`requirements.txt`**: List of required Python libraries.
 
 ## Troubleshooting/Known Bugs
-- Adding the FFT plot will replace the currently shown plot. It doesn't add the new plot next to the pre-existing one. 
+- None.
 
 ## Future Work
 - The GUI can currently only read from .edf files when uploading. Future work would include expanding the capabilities to .csv, .dat, and .txt files. 
 - Apply ability for the user to change the layout and/or add more plot selections.
 - Add the capability to import ML model to plot markers or notes on the waveform.
 - The EEG topography map is not connected to real information. In the future, this will be show the real locations of the electrodes on the headset and determine the contour lines/distribution frequency on the head. 
-
