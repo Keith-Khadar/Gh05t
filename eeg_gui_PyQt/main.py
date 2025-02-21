@@ -8,7 +8,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette
 import numpy as np
-from utils import PlotManager, load_file, export_data, BLEWorker, EEGBLE
+from utils import PlotManager, load_file, export_rt_data, export_data, BLEWorker, EEGBLE
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -144,8 +144,7 @@ class MainWindow(QMainWindow):
             "This GUI is designed to help you visualize EEG data and connect to Bluetooth devices.<br>"
             "You can upload your EEG data files or pair the app with a compatible Bluetooth device.<br><br>"
             "Instructions:<br>"
-            "- Use the 'Data Input' dropdown in the top bar to upload data or connect a Bluetooth device.<br>"
-            "- Navigate through other options like Settings, Layout, and more.<br><br>"
+            "- Use the 'Data Input' dropdown in the top bar to upload data or connect a Bluetooth device.<br><br>"
             "Click the link below to view the source code and report any issues!<br>"
             "Github Repository: <a href='https://github.com/Keith-Khadar/Gh05t' style='color: #1E2A38; font-weight:bold;'> https://github.com/Keith-Khadar/Gh05t</a>"
         )
@@ -184,10 +183,16 @@ class MainWindow(QMainWindow):
         self.data_loaded = False
         self.ble_reading = False
         self.play_animation = False
+        self.play_rt_animation = False
+        self.paused_rt = False
+        self.fft_rt = False
 
         self.plot_manager = PlotManager(self.row3)
 
         self.plots = []
+        self.channel_names = []
+        self.data = np.empty((0, 3))
+        self.time = np.empty((0, 1))
 
     def handle_file_input(self):
         '''Opens a file dialog to upload data from a file.'''
@@ -201,8 +206,6 @@ class MainWindow(QMainWindow):
             self.data, self.time, self.channel_names = load_file(file_path)
 
             self.clear_layout(self.row3_layout)
-
-            self.add_plot("Time Series")
             self.data_loaded = True
 
     def handle_real_time_input(self):
@@ -210,6 +213,14 @@ class MainWindow(QMainWindow):
         if not hasattr(self, 'ble_worker'):
             self.clear_layout(self.row3_layout)
 
+            self.real_time = PlotManager(self.row3)
+            self.row3_layout.addWidget(self.real_time.canvas)
+            row_splitter = QSplitter(Qt.Horizontal)
+            row_splitter.addWidget(self.real_time.canvas)
+            self.row3.addWidget(row_splitter)
+
+            self.real_fft = PlotManager(self.row3)
+                
             self.status_bar.showMessage("Connecting to BLE device...")
             self.ble_worker = BLEWorker()
             self.ble_worker.data_received.connect(self.handle_real_time)
@@ -219,7 +230,6 @@ class MainWindow(QMainWindow):
             self.ble_worker.connection_failed_signal.connect(self.handle_connection_failed)
         
             self.ble_reading = True
-            self.data_loaded = True
             self.row2_widget.setVisible(True)
     
     def handle_connection_failed(self):
@@ -227,27 +237,50 @@ class MainWindow(QMainWindow):
         self.ble_reading = False
 
     def update_status_bar(self, message):
+        """Update the status bar with the given message.
+        
+        :param message: The message to display in the status bar."""
         self.statusBar().showMessage(message)
 
     def handle_real_time(self, ble_timestamp, ble_data):
-        """Process incoming BLE data and update the plot."""
+        """Process incoming BLE data and update the plot.
+        
+        :param ble_timestamp: The timestamp of the incoming data.
+        :param ble_data: The incoming data."""
         if ble_data is None:
             return
-
+    
         self.data = ble_data
-        self.timestamp = ble_timestamp
-        self.channel_names = ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7", "Ch8"]
-        print("Setting up Real Time plotting")
+        self.time = ble_timestamp
 
-        self.plot_manager.handle_real_time_data(self.data, self.timestamp)
+        ble_data = np.array(ble_data).reshape((8, 1))
+
+        if self.fft_rt:
+            self.row3_layout.addWidget(self.real_fft.canvas)
+            self.real_time.plot_fft(ble_data)
+
+        self.real_time.handle_real_time_data(ble_data, ble_timestamp)
+
+        if not self.play_rt_animation and not self.paused_rt:
+            print("Starting real-time animation...")
+            self.statusBar().showMessage("Starting Real Time Animation Plot")
+            self.play_button.setText("Stop Data Stream")
+            self.play_rt_animation = True
+            self.real_time.start_rt_animation()
 
     def play_data_stream(self):
         """Start the animation for all applicable plots."""
+        if len(self.plots) == 0 and not self.ble_reading:
+            self.statusBar().showMessage("No plots to animate!")
+            return
+
         if self.data_loaded and not self.play_animation:
             self.statusBar().showMessage("Playing data stream...")
             for plot in self.plots:
                 if plot.plot_type == "Time Series":
-                    plot.play_data(self.data, self.channel_names)
+                    plot.play_time(self.data, self.channel_names)
+                elif plot.plot_type == "FFT":
+                     plot.play_fft(self.data)
             self.play_button.setText("Stop Data Stream")
             self.play_animation = True
         elif self.play_animation and self.data_loaded:
@@ -256,6 +289,17 @@ class MainWindow(QMainWindow):
                 plot.stop_animation()
             self.play_button.setText("Start Data Stream")
             self.play_animation = False
+        elif self.play_rt_animation and self.ble_reading:
+            self.statusBar().showMessage("Stopping real-time data stream...")
+            self.play_button.setText("Start Data Stream")
+            self.real_time.stop_animation()
+            self.play_rt_animation = False
+            self.paused_rt = True
+        elif self.paused_rt and self.ble_reading:
+            self.statusBar().showMessage("Resuming real-time data stream...")
+            self.play_button.setText("Stop Data Stream")
+            self.real_time.start_rt_animation()
+            self.paused_rt = False
         else:
             self.statusBar().showMessage("No data loaded!")
 
@@ -264,25 +308,38 @@ class MainWindow(QMainWindow):
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv)")
         
         if file_path:
-            success = export_data(file_path, self.data, self.time, self.channel_names)
+            if self.ble_reading:
+                data_rt, time_rt = self.real_time.return_rt_data()
+                data_rt = np.array(data_rt)
+                if self.channel_names is None or len(self.channel_names) == 0:
+                    self.channel_names = [f"Channel {i + 1}" for i in range(data_rt.shape[0])]
+                success = export_rt_data(file_path, data_rt, time_rt, self.channel_names)
+            else: 
+                success = export_data(file_path, self.data, self.time, self.channel_names)
+
             if success:
                 self.status_bar.showMessage("Export successful!", 3000)
             else:
                 self.status_bar.showMessage("Export failed!", 3000)
                 
     def add_plot(self, plot_type):
-        """Dynamically add a new plot to a resizable grid."""
-        new_plot = PlotManager(self.row3)
-        new_plot.plot_type = plot_type
+        """Dynamically add a new plot to a resizable grid.
+        
+        :param plot_type: The type of plot to add."""
+        if plot_type == "FFT" and self.ble_reading:
+            new_plot = self.real_fft
+            self.fft_rt = True
+        else:
+            new_plot = PlotManager(self.row3)
+            new_plot.plot_type = plot_type
 
-        if plot_type == "Time Series":
-            new_plot.plot_data(self.data, self.time, self.channel_names, plot_type)
-            self.statusBar().showMessage("Loaded Time Series Plot")
-        elif plot_type == "FFT":
-            fft_data = np.fft.fft(self.data, axis=1)
-            freqs = np.fft.fftfreq(self.data.shape[1], d=1/250)
-            new_plot.plot_data(np.abs(fft_data), freqs, self.channel_names, plot_type)
-            self.statusBar().showMessage("Loaded FFT Plot")
+            if plot_type == "Time Series":
+                new_plot.plot_data(self.data, self.time, self.channel_names, plot_type)
+                self.statusBar().showMessage("Loaded Time Series Plot")
+            elif plot_type == "FFT":
+                new_plot.plot_data(self.data, self.time, self.channel_names, plot_type)
+                self.statusBar().showMessage("Loaded FFT Plot")
+
         if self.row3.count() == 0:
             row_splitter = QSplitter(Qt.Horizontal)
             row_splitter.addWidget(new_plot.canvas)
@@ -299,6 +356,9 @@ class MainWindow(QMainWindow):
         self.plots.append(new_plot)
 
     def clear_layout(self, layout):
+        """Clear the layout of all widgets.
+
+        :param layout: The layout to clear."""
         if self.welcome_widget is not None:
             self.row3_layout.setRowStretch(0, 0)
             self.row3_layout.setRowStretch(2, 0)
@@ -314,21 +374,11 @@ class MainWindow(QMainWindow):
                     layout.removeItem(item)
 
     def closeEvent(self, event):
-        # reply = QMessageBox.question(
-        #     self, 
-        #     "Window Close", 
-        #     "<span style='color: black;'>Are you sure you want to close the window?</span>", 
-        #     QMessageBox.Yes | QMessageBox.No, 
-        #     QMessageBox.No
-        # )
-
-        # if reply == QMessageBox.Yes:
+        """Close the window and disconnect the BLE worker."""
         if self.ble_reading is None:
             self.ble_worker.disconnect_ble()
         self.close()
         print('Window closed')
-        # else:
-        #     pass
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

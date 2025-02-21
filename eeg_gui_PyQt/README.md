@@ -54,5 +54,6 @@ python main.py
 ## Future Work
 - The GUI can currently only read from .edf files when uploading. Future work would include expanding the capabilities to .csv, .dat, and .txt files. 
 - Apply ability for the user to change the layout and/or add more plot selections.
+- Add the ability to apply signal processing filters to the incoming BLE or file uploaded data.
 - Add the capability to import ML model to plot markers or notes on the waveform.
 - The EEG topography map is not connected to real information. In the future, this will be show the real locations of the electrodes on the headset and determine the contour lines/distribution frequency on the head. 
