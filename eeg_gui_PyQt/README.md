@@ -43,7 +43,8 @@ python main.py
   - **`ble_handler_.py`**: Creates client to recieve incoming information from the ESP32 BLE server.
   - **`plot_manager.py`**: Plots various types of Graphs specified by the user.
   - **`file_handler.py`**: Handles the file uploading, handling, and exporting for data. 
-- **`resource/`**: Contains any png or supporting files for the GUI
+- **`resource/`**: Contains any png or supporting files for the GUI.
+- **`test/`**: Folder containing all the unit tests for the GUI.
 - **`example_eeg_data/`**: Includes eeg data that can be used to test the visualizer.
 - **`test/`**: Contains all the unit testing for the GUI.
 - **`requirements.txt`**: List of required Python libraries.
