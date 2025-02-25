@@ -118,111 +118,167 @@ class PlotManager:
         self.canvas.draw()
 
     def real_time_stackplot(self, marray, seconds=None, ylabels=None, ax=None):
-        """Plot a stack of traces in real-time with ADC values converted to a 200mV range.
-        
-        :param marray: 2D array of shape (numRows, numSamples) containing the data to plot.
-        :param seconds: float representing the total duration of the data in seconds.
-        :param ylabels: list of labels for the y-axis.
-        :param ax: matplotlib Axes object to plot on. If None, uses the default axis.
-        """
+        """Plot stacked traces with dynamic per-channel scaling in fixed lanes"""
         numRows, numSamples = marray.shape
-        max_window_size = 10
+        max_window_size = 10  # Seconds
 
+        # Time axis setup
         if numSamples == 1:
-            t = np.array([0, 1]) 
+            t = np.array([0, 1])
             marray = np.hstack((marray, marray))
         else:
             t = np.linspace(0, seconds, numSamples, dtype=float) if seconds else np.arange(numSamples, dtype=float)
 
+        # Window management
         if not hasattr(self, 'x_window'):
             self.x_window = list(t)
         else:
-            self.x_window.append(t[-1]) 
+            self.x_window.append(t[-1])
 
         window_start = self.x_window[0]
         window_end = self.x_window[-1]
 
         if window_end - window_start > max_window_size:
             window_start = window_end - max_window_size
-
         if window_end == window_start:
             window_end += 1
 
-        adc_max_value = 16777215 # 5V
-        adc_min_value = 0 # 0V
-        marray_volt = (marray / adc_max_value) * 0.2
+        # ADC to voltage conversion
+        adc_max_value = 8388607  # 2^23 - 1 for signed 24-bit
+        marray_volt = (marray / adc_max_value) * 5  # Convert to volts
+        marray_mv = marray_volt * 1000  # Convert to millivolts
 
-        offset_amount = 3 * 0.5
-        ticklocs = np.arange(numRows) * offset_amount
+        # Auto-scaling parameters
+        base_offset = 1000  # mV between channel baselines
+        lane_height = 800   # mV vertical range per channel
+        ylim_padding = 200  # mV padding at top/bottom
+        
+        # Initialize scaling parameters if not exists
+        if not hasattr(self, 'channel_scales'):
+            self.channel_scales = [1.0] * numRows
+            self.channel_offsets = [0.0] * numRows
+            self.channel_centers = [0.0] * numRows
 
-        segs = [np.column_stack((t, marray_volt[i, :] + ticklocs[i])) for i in range(numRows)]
-        offsets = np.zeros((numRows, 2), dtype=float)
+        if hasattr(self, 'vertical_line_x'):
+            time_offset = self.vertical_line_x - window_end
+            new_x = window_end + time_offset
+        else:
+            new_x = window_start
 
+        scaled_data = np.zeros_like(marray_mv)
+        ticklocs = []
+        
+        for i in range(numRows):
+            # Get current channel data
+            ch_data = marray_mv[i]
+            
+            # Calculate dynamic scaling parameters
+            data_min = np.min(ch_data)
+            data_max = np.max(ch_data)
+            data_center = (data_max + data_min) / 2
+            data_range = data_max - data_min
+            
+            # Prevent division by zero (initial case)
+            if data_range == 0:
+                data_range = 1
+                
+            # Calculate scaling parameters
+            self.channel_scales[i] = lane_height / data_range
+            self.channel_offsets[i] = i * base_offset
+            self.channel_centers[i] = data_center
+            
+            # Scale and center data
+            scaled_data[i] = (ch_data - data_center) * self.channel_scales[i] + self.channel_offsets[i]
+            
+            ticklocs.append(i * base_offset)
+
+        # Create line segments
+        segs = [np.column_stack((t, scaled_data[i])) for i in range(numRows)]
+        
         if ax is None:
             ax = self.ax
-
         ax.clear()
-        lines = LineCollection(segs, offsets=offsets, transOffset=None, colors='black')
+
+        # Plot data
+        lines = LineCollection(segs, colors='black')
         ax.add_collection(lines)
 
-        self.vertical_line = ax.axvline(
-            x=1, 
-            color='r', 
-            linestyle='--', 
-            linewidth=1, 
-            picker=10
-        )
+        # Draw lane boundaries
+        for i in range(numRows):
+            y_center = i * base_offset
+            ax.axhspan(y_center - lane_height/2, 
+                    y_center + lane_height/2, 
+                    facecolor='#f0f0f0', alpha=0.2)
+            
+            # Add compact range label
+            range_half = lane_height/(2*self.channel_scales[i])
+            ax.text(window_start + 0.1, y_center, 
+                    f'±{range_half:.0f}',
+                    va='center', ha='left', 
+                    fontsize=7, color='#666666')
 
-        self.current_marray = marray_volt
+        # Vertical line initialization
+        if self.vertical_line is None:
+            self.vertical_line = ax.axvline(x=new_x, color='r', 
+                                        linestyle='--', linewidth=0.5, picker=10)
+        else:
+            self.vertical_line.set_xdata([new_x])
+
+        # Store current position for next update
+        self.vertical_line_x = new_x
+
+        # Axis configuration
+        y_min = -lane_height/2 - ylim_padding
+        y_max = (numRows-1)*base_offset + lane_height/2 + ylim_padding
+        ax.set_xlim(window_start, window_end)
+        ax.set_ylim(y_min, y_max)
+        ax.set_yticks(ticklocs)
+        ax.set_yticklabels([f"Channel {i+1}" for i in range(numRows)])
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Scaled Voltage')
+
+        # Store current data state
+        self.current_marray = marray_mv  # Store original data for annotations
         self.current_t = t
         self.current_ticklocs = ticklocs
+        self.channel_scales = self.channel_scales  # Make available for annotations
+        self.channel_centers = self.channel_centers
 
-        self.update_annotations(window_start, marray_volt, t, ticklocs)
-
-        ax.set_xlim(window_start, window_end)
-        ax.set_ylim(-offset_amount, ticklocs[-1] + offset_amount)
-
-        ax.set_yticks(ticklocs)
-        ax.set_yticklabels(ylabels or [f"Channel {i+1}" for i in range(numRows)])
-
-        self.figure.patch.set_alpha(0)
-        self.canvas.setStyleSheet("background:#85a0bb;")
-        ax.set_facecolor((0, 0, 0, 0))
-
-        ax.set_xlabel('Time (s)')
-
-        if self.vertical_line is None:
-            self.vertical_line = ax.axvline(x=window_start, color='r', linestyle='--', linewidth=1, picker=True)
-            self.update_annotations(window_start, marray_volt, t, ticklocs)
-
+        self.update_annotations(new_x, marray_mv, t, ticklocs)
         self.canvas.draw()
 
     def update_annotations(self, x, marray, t, ticklocs):
-        """Update annotations for the vertical line.
-
-        :param x: The x position for the vertical line.
-        :param marray: 2D array of shape (numRows, numSamples) containing the data for annotations.
-        :param t: 1D array of time values corresponding to the data.
-        :param ticklocs: 1D array of y-axis tick locations.
-        """
+        """Update annotations while maintaining vertical line position"""
+        # Remove old annotations
         for ann in self.annotations:
             ann.remove()
         self.annotations.clear()
 
+        # Create new annotations
         for i in range(marray.shape[0]):
-            y_values = marray[i, :]
+            # Find nearest time index
             idx = np.argmin(np.abs(t - x))
-            signal_value = y_values[idx]
             
-            y_annotation = signal_value + ticklocs[i]
-
+            # Get original voltage value
+            raw_value = marray[i, idx]
+            
+            # Calculate position
+            scaled_y = ((raw_value - self.channel_centers[i]) * self.channel_scales[i]) + ticklocs[i]
+            
+            # Create annotation
             ann = self.ax.annotate(
-                f"{signal_value:.2f}",
-                xy=(x, y_annotation),
-                xytext=(10, 0),
+                f"{raw_value:.1f}",
+                xy=(x, scaled_y),
+                xytext=(8, 0),  # Reduced text offset
                 textcoords='offset points',
-                bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="black", lw=1),
-                fontsize=8
+                fontsize=8,
+                color='red',
+                bbox=dict(
+                    boxstyle="round,pad=0.2",
+                    fc="white",
+                    ec="none",
+                    alpha=0.9
+                )
             )
             self.annotations.append(ann)
 
@@ -238,11 +294,16 @@ class PlotManager:
         self.dragging = False
 
     def on_motion(self, event):
-        """Handle mouse motion events."""
+        """Handle mouse motion with persistent position tracking"""
         if not self.dragging or event.inaxes != self.ax or self.vertical_line is None:
             return
+        
+        # Store absolute position relative to window end
         x = event.xdata
+        self.vertical_line_x = x
         self.vertical_line.set_xdata([x, x])
+        
+        # Update annotations with current data
         self.update_annotations(x, self.current_marray, self.current_t, self.current_ticklocs)
         self.canvas.draw()
 
@@ -486,8 +547,8 @@ class PlotManager:
         :param timestamp: Integer representing the timestamp of the new data."""
         new_data = np.array(new_data).reshape((8, 1))
 
-        adc_max_value = 16777215
-        marray_volt = (new_data / adc_max_value) * 0.2
+        adc_max_value = 8388607
+        marray_volt = (new_data / adc_max_value) * 5
         print(marray_volt)
 
         timestamp = timestamp / 1000.0

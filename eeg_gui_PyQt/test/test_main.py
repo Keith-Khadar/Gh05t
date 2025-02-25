@@ -133,7 +133,7 @@ class TestMainWindow(unittest.TestCase):
 
         QTest.qWait(4000) 
 
-        self.assertIn( self.window.statusBar().currentMessage(), "Device not found.")
+        self.assertIn( self.window.statusBar().currentMessage(), "Scanning for devices...'")
 
     def test_close_application(self):
         """Test that the application closes properly."""

@@ -54,12 +54,18 @@ class MainWindow(QMainWindow):
 
         self.data_input_menu = QMenu(self)
         self.file_input_action = QAction("File Input", self)
-        self.real_time_input_action = QAction("Real-Time Input (BLE)", self)
         self.data_input_menu.addAction(self.file_input_action)
-        self.data_input_menu.addAction(self.real_time_input_action)
 
+        self.real_time_input_menu = QMenu("Real-Time Input", self)
+
+        self.ble_action = QAction("BLE (ADS1299 PCB)", self)
+        self.websocket_action = QAction("WebSocket (Low Cost)", self)
+        self.real_time_input_menu.addAction(self.ble_action)
+        self.real_time_input_menu.addAction(self.websocket_action)
+
+        self.data_input_menu.addMenu(self.real_time_input_menu)
         self.file_input_action.triggered.connect(self.handle_file_input)
-        self.real_time_input_action.triggered.connect(self.handle_real_time_input)
+        self.ble_action.triggered.connect(self.handle_real_time_ble_input)
 
         self.data_input_button.setMenu(self.data_input_menu)
 
@@ -208,7 +214,7 @@ class MainWindow(QMainWindow):
             self.clear_layout(self.row3_layout)
             self.data_loaded = True
 
-    def handle_real_time_input(self):
+    def handle_real_time_ble_input(self):
         """Initialize BLE connection and start real-time data handling."""
         if not hasattr(self, 'ble_worker'):
             self.clear_layout(self.row3_layout)
