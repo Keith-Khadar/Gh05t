@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/CMakeFiles/picotoolBuild"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/CMakeFiles/picotoolBuild.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/CMakeFiles/picotoolBuild-complete.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-build.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-configure.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-download.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-install.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-mkdir.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-patch.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-test.rule"
+		},
+		{
+			"file" : "/home/embedded/pico/Gh0st/build/picotool/src/picotoolBuild-stamp/picotoolBuild-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"picotoolBuild"
+		],
+		"name" : "picotoolBuild"
+	}
+}
