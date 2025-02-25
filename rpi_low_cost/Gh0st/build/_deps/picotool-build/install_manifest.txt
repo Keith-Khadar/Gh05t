@@ -1,0 +1,5 @@
+/home/embedded/pico/Gh0st/build/_deps/picotool/picotool
+/home/embedded/pico/Gh0st/build/_deps/picotool/picotoolTargets.cmake
+/home/embedded/pico/Gh0st/build/_deps/picotool/picotoolTargets-release.cmake
+/home/embedded/pico/Gh0st/build/_deps/picotool/picotoolConfig.cmake
+/home/embedded/pico/Gh0st/build/_deps/picotool/picotoolConfigVersion.cmake
