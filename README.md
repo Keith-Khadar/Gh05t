@@ -12,7 +12,7 @@ We provide various levels to users depending on cost and precision:
 ## Completed Work/In Progress for Milestone Beta
 - **Working High Cost Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan.
   - Work in progress on recovering valid information from the electrode channel readings. 
-- **Working Lost Cost Circuit/Pipeline**: A working filtering circuit and communication was completed by connecting a custom electrode headband to the circuit and RPi Pico w. 
+- **Working Low Cost Circuit/Pipeline**: A working filtering circuit and communication was completed by connecting a custom electrode headband to the circuit and RPi Pico w. 
   - Work in process on creating a stable prototype that connects to the GUI for real-time sampling.
 - **Optimizing Real Time Reading on the GUI**: The GUI is able to read in real time with minimal frame lag in the plotting features. Latency is prevalent in between the ESP32 SPI sampling and the GUI processing of about 10-15 seconds. 
   - Further optimization work in progress during the beta test planning. 
