@@ -58,15 +58,15 @@ Figure: EEG dataset pipeline from data collection to visualization
     - Input: Raw 4 channel electrode data
     - Output: K-Independent Signals (Components)
   - Processing Options:
-    - FastICA or JADE: Fast Inference
-    - InfoMax or EInfoMax: Versatility & Robustness
+    - FastICA , NLMS: Fast Inference
+    - InfoMax or VSS-APA: Versatility & Robustness
 
 - **EEG Signal Machine Learning**:
   - Format:
     - Input: K-Independent Signals (Components)
-    - Output: 3D-Pose using 133 Keypoints
+    - Output: User Defined Target Output
   - Target:
-    - User Defined Target signal, i.e. eye activity or motion.
+    - User Defined Target Desired Output, i.e. eye activity or motion.
   - Model:
     - Structure: Artifical Neural Network (Regressor)
     - Pre-Training: PCA-Pretraining for optimal features
