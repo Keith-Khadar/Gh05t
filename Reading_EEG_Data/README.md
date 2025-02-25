@@ -3,6 +3,7 @@
 ## Overview:
 The High-Performance Microcontroller Board integrates a 24-bit ADC to capture high-resolution EEG signals and transmits the data wirelessly using an ESP32-based development board. 
 The setup allows seamless data transfer to an ESP32-C6 module, which then relays the EEG data over WiFi (ESPNOW) to a connected laptop for analysis and visualization.
+![final_img](https://github.com/user-attachments/assets/43cc4ee9-4ac0-4c07-87eb-3f372cc2ac09)
 
 ## System workflow:
 1. EEG signals are captured from snap electrodes and processed using an ESP32 development board.
@@ -35,18 +36,20 @@ The setup allows seamless data transfer to an ESP32-C6 module, which then relays
    A- Connect EEG snap electrodes to the ADS1299 board.
    B- Ensure the ESP32 development board and ESP32-C6 module are powered and configured.
    C- Ensure that all the electrodes are in contact with the scalp.
-2. **Data acquisition**
+   ![image](https://github.com/user-attachments/assets/ed849d00-407b-4b9b-b622-1c76eea5a5d5)
+
+3. **Data acquisition**
    A- Open the Arduino Serial Monitor to check real-time EEG data transmission.
    B- Run the provided Python script to capture data from the serial port.
-3. **Visualization and analysis**
-   A- View the recorded data in OpenBCI GUI to visualze the EEG dat for all 8 channels.
+![reciever](https://github.com/user-attachments/assets/a38cc0d9-1d12-4a00-a44a-9e0ed74b7f91)
+![python_script](https://github.com/user-attachments/assets/b7d3d6ac-e961-4d5c-bfa1-aba720ed82bc)
+   
+5. **Visualization and analysis**
+   A- View the recorded data in OpenBCI GUI to visualze the EEG data for all 8 channels.
+   ![GUI](https://github.com/user-attachments/assets/e260e019-36f6-4e70-bbdf-fcbd84b48b2d)
 
 ## References
-1. https://www.ti.com/product/ADS1299
-2. https://www.espressif.com/en/products/socs/esp32
-3. https://docs.openbci.com
-4. https://datasheet.octopart.com/ADS1299IPAG-Texas-Instrumentsdatasheet-
-17020782.pdf
-5. https://docs.espressif.com/projects/espidf/
-en/stable/esp32s3/api-guides/current-consumption-measurementmodules.
-html
+1. [https://www.ti.com/product/ADS1299](https://www.ti.com/product/ADS1299)
+2. [https://docs.openbci.com/](https://docs.openbci.com/)
+3. [https://datasheet.octopart.com/ADS1299IPAG-Texas-Instrumentsdatasheet-17020782.pdf](https://datasheet.octopart.com/ADS1299IPAG-Texas-Instruments-datasheet-17020782.pdf)
+4. [https://openbci.com/community/concentratetoday-neurofeedback-enhancing-concentration-level/](https://openbci.com/community/concentratetoday-neurofeedback-enhancing-concentration-level/)
