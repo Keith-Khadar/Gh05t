@@ -49,7 +49,7 @@ Figure:EEG dataset pipeline from data collection to visualization
 - **OpenBCI GUI**
 
 ### **2. Hardware Requirements**
-- **ESP32 Dev Board with ESP32-S3-WROOM-1 and 24-bit ADC** 
+- **ESP32 Dev Board with ESP32-S3-WROOM-1 and 24-bit ADC** [https://www.aliexpress.us/item/3256806073268159.html?spm=a2g0o.order_list.order_list_main.20.54681802966XjN&gatewayAdapt=glo2usa](https://www.aliexpress.us/item/3256806073268159.html?spm=a2g0o.order_list.order_list_main.20.54681802966XjN&gatewayAdapt=glo2usa)
 - **ESP32-C6**  
 - **EEG Headset** 
 - **2 USB Cables** (USB-C or Micro-USB)
