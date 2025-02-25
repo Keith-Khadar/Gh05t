@@ -4,6 +4,7 @@
 The High-Performance Microcontroller Board integrates a 24-bit ADC to capture high-resolution EEG signals and transmits the data wirelessly using an ESP32-based development board. 
 The setup allows seamless data transfer to an ESP32-C6 module, which then relays the EEG data over WiFi (ESPNOW) to a connected laptop for analysis and visualization.
 ![final_img](https://github.com/user-attachments/assets/43cc4ee9-4ac0-4c07-87eb-3f372cc2ac09)
+Figure:EEG dataset pipeline from data collection to visualization
 
 ## System workflow:
 1. EEG signals are captured from snap electrodes and processed using an ESP32 development board.
@@ -31,22 +32,58 @@ The setup allows seamless data transfer to an ESP32-C6 module, which then relays
 8. **Rechargeable & portable**: Features a **USB-rechargeable battery**, on/off and reset switches, and a lightweight design for improved user experience.
 9. **Expandable channel support**: The system supports an additional **ADS1299 module**, increasing EEG channels from **8 to 16**.
 
+## Files
+1. **document_data.py**: This Python script is responsible for capturing and processing the EEG data received from the ESP32-C6 over the serial port.
+2. **ReceiverCode/ReceiverCode.ino**: This Arduino sketch runs on the ESP32-C6, which acts as the receiver of the EEG data transmitted via WiFi (ESPNOW).
+3. **SenderCode/SenderCode.h**: Header file containing function prototypes and constants used by SenderCode.cpp and SenderCode.ino.
+4. **SenderCode/SenderCode.cpp**: This file implements core functions for acquiring EEG signals and transmitting them via ESPNOW.
+5. **SenderCode/SenderCode.ino**: The main Arduino sketch for the ESP32 (EEG signal acquisition & transmission).
+
+## **Installation & Setup**
+
+### **1. Downloads**
+- **Arduino IDE**
+- **ESP32 Board Package** (via Arduino Board Manager)
+- **Python (3.8+)**
+- **PySerial Library** (`pip install pyserial`)
+- **OpenBCI GUI**
+
+### **2. Hardware Requirements**
+- **ESP32 Dev Board with ESP32-S3-WROOM-1 and 24-bit ADC** 
+- **ESP32-C6**  
+- **EEG Headset** 
+- **2 USB Cables** (USB-C or Micro-USB)
+
+## **Setup and execution**
+### **1. Setting Up the ESP32 & ESP32-C6**
+- Install Arduino IDE and ESP32 board package.
+- Upload **SenderCode.ino** to the ESP32 high-performance board.
+- Upload **ReceiverCode.ino** to the ESP32-C6 module.
+
+### **2. Running the Python Script**
+- `pip install pyserial`
+- `python3 document_data.py`
+
 ## Usage Instructions
 1. **Hardware setup**
    A- Connect EEG snap electrodes to the ADS1299 board.
    B- Ensure the ESP32 development board and ESP32-C6 module are powered and configured.
    C- Ensure that all the electrodes are in contact with the scalp.
    ![image](https://github.com/user-attachments/assets/ed849d00-407b-4b9b-b622-1c76eea5a5d5)
+Figure:EEG Headset and high performance board
 
 3. **Data acquisition**
    A- Open the Arduino Serial Monitor to check real-time EEG data transmission.
    B- Run the provided Python script to capture data from the serial port.
 ![reciever](https://github.com/user-attachments/assets/a38cc0d9-1d12-4a00-a44a-9e0ed74b7f91)
+Figure:Receiver code run on XIAO-ESP32-C6 board to obtain 8-channel data via WiFi visible in the serial monitor
 ![python_script](https://github.com/user-attachments/assets/b7d3d6ac-e961-4d5c-bfa1-aba720ed82bc)
-   
+Figure:Python script writing the data  to a text file
+
 5. **Visualization and analysis**
    A- View the recorded data in OpenBCI GUI to visualze the EEG data for all 8 channels.
    ![GUI](https://github.com/user-attachments/assets/e260e019-36f6-4e70-bbdf-fcbd84b48b2d)
+Figure:EEG 8 channel data in the GUI Interface
 
 ## References
 1. [https://www.ti.com/product/ADS1299](https://www.ti.com/product/ADS1299)
