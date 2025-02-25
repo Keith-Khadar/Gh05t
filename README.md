@@ -19,8 +19,8 @@ We provide various levels to users depending on cost and precision:
 - **Working High Performance Pipeline**: A high-performance EEG pipeline seamlessly acquires, transmits, and processes brain signals with ultra-low noise and real-time wireless efficiency. Using a EEG ESP32 development board connected to a ESP32 C6, data can be successfully read and processed for valid information using the OpenBCI GUI. Alpha waves (8-10 Hz) were successfully detected, confirming neural activity.
 - **Second Version ADS1299 PCB Design**: A new design of the custom ADS1299 PCB is created to decrease the size of the first version and have the addition of headers to connect microcontroller directly to for a smaller and more stable package. 
   - The design is still being iterated upon and tested before sending for printing.  
-- **Signal Preprocessing** : XXXXX
-- **Event Detection Model**: XXXXX
+- **Signal Preprocessing** : The EEG signal preprocessing pipeline is fully implemented, ensuring artifact removal, filtering, and independent component extraction before further processing. FastICA, InfoMax, NLMS and VSS-APA are implemented to extract information components from raw EEG signals in real-time. 
+- **Event Detection/Prediction Model**: The EEG-based event detection pipeline and machine learning models have been developed to analyze real-time brain activity and infer motor function. NLMS, Batch-Wiener Filter and VSS-APA have been implemeted for predictions - Statistical Deviation Event Detection Model and Information Theoretic Learning Point Process Detection Models have been implemented for more sophisticed event flagging.
 
 ## Project Architecture
 
@@ -66,9 +66,7 @@ Figure: EEG dataset pipeline from data collection to visualization
     - Input: K-Independent Signals (Components)
     - Output: 3D-Pose using 133 Keypoints
   - Target:
-    - [RTMPose3d](https://github.com/open-mmlab/mmpose/tree/main/projects/rtmpose3d): Multi-person 3D Pose Estimator, generates Pose Information
-    - Motion Estimates: Process pose data to generate *relative* motion estimates
-    - [Demo](./pose-recognition/DEMO_GH05T.mp4)
+    - User Defined Target signal, i.e. eye activity or motion.
   - Model:
     - Structure: Artifical Neural Network (Regressor)
     - Pre-Training: PCA-Pretraining for optimal features
