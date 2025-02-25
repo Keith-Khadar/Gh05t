@@ -35,7 +35,7 @@ The architecture of the project is structured as follows:
 - **Components**: ESP32 (Seeed Studio XIAO ESP32C6), Voltage Booster, LiPo Battery
 
 ![High-Performancce-Board](https://github.com/user-attachments/assets/43cc4ee9-4ac0-4c07-87eb-3f372cc2ac09)
-Figure:EEG dataset pipeline from data collection to visualization
+Figure: EEG dataset pipeline from data collection to visualization
 
 ### **Software**:
 ---
