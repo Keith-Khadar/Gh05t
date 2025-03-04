@@ -2,13 +2,13 @@ import sys
 import asyncio
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, 
-    QStatusBar, QMenu, QAction, QGridLayout, QSplitter, QMessageBox
+    QStatusBar, QMenu, QAction, QGridLayout, QSplitter, QMessageBox, QComboBox
 )
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette
+from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase
 import numpy as np
-from utils import PlotManager, load_file, export_rt_data, export_data, BLEWorker, EEGBLE
+from utils import PlotManager, EEGWebSocket, load_file, export_rt_data, export_data, BLEWorker, EEGBLE
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -18,6 +18,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("EEG Data Visualizer")
         self.setGeometry(100, 100, 1200, 800)
         self.setMinimumSize(800, 600)
+
+        font_id = QFontDatabase.addApplicationFont("resources\FuturisticYourself.ttf")
+        if font_id == -1:
+            print("Failed to load font.")
+        else:
+            font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         
         dark_palette = QPalette()
         dark_palette.setColor(QPalette.Window, QColor(53, 53, 53))
@@ -48,11 +54,13 @@ class MainWindow(QMainWindow):
         row1_widget.setFixedHeight(35)
 
         self.data_input_button = QPushButton("Data Input")
+        self.data_input_button.setCursor(Qt.PointingHandCursor)
         self.data_input_button.setFixedWidth(150)
         self.data_input_button.setFixedHeight(25)
         self.data_input_button.setStyleSheet("color: white; background-color: #2C3E50;")
 
         self.data_input_menu = QMenu(self)
+        self.data_input_menu.setCursor(Qt.PointingHandCursor)
         self.file_input_action = QAction("File Input", self)
         self.data_input_menu.addAction(self.file_input_action)
 
@@ -66,21 +74,20 @@ class MainWindow(QMainWindow):
         self.data_input_menu.addMenu(self.real_time_input_menu)
         self.file_input_action.triggered.connect(self.handle_file_input)
         self.ble_action.triggered.connect(self.handle_real_time_ble_input)
+        self.websocket_action.triggered.connect(self.websocket_input)
 
         self.data_input_button.setMenu(self.data_input_menu)
 
         title_layout = QHBoxLayout()
 
-        # icon_label = QLabel()
-        # icon_pixmap = QPixmap("resources\icon_white.png")
-        # icon_label.setPixmap(icon_pixmap.scaled(24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation))
-
+        custom_font = QFont(font_family, 23)
         self.title_label = QLabel("GH05T EEG")
-        self.title_label.setFont(QFont("Arial", 16))
+        self.title_label.setCursor(Qt.PointingHandCursor)
+        self.title_label.setFont(custom_font)
         self.title_label.setStyleSheet("color: white;")
         self.title_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.title_label.mousePressEvent = self.reset_application
 
-        # title_layout.addWidget(icon_label)
         title_layout.addWidget(self.title_label)
         title_layout.addStretch(1)
 
@@ -99,6 +106,7 @@ class MainWindow(QMainWindow):
         row2_widget.setFixedHeight(35)
 
         self.play_button = QPushButton("Start Data Stream")
+        self.play_button.setCursor(Qt.PointingHandCursor)
         self.play_button.setFixedWidth(150)
         self.play_button.setFixedHeight(25)
         self.play_button.setStyleSheet("color: white; background-color: #3498DB;")
@@ -107,25 +115,60 @@ class MainWindow(QMainWindow):
         row2.addWidget(self.play_button)
 
         self.export_button = QPushButton("Export Data")
+        self.export_button.setCursor(Qt.PointingHandCursor)
         self.export_button.setFixedWidth(150)
         self.export_button.setFixedHeight(25)
         self.export_button.setStyleSheet("color: white; background-color: #3498DB;")
         self.export_button.clicked.connect(self.export_data_to_file)
 
+        self.signal_processing = QPushButton("Signal Processing")
+        self.signal_processing.setCursor(Qt.PointingHandCursor)
+        self.signal_processing.setFixedWidth(150)
+        self.signal_processing.setFixedHeight(25)
+        self.signal_processing.setStyleSheet("color: white; background-color: #3498DB;")
+        # self.signal_processing.clicked.connect(self.signal_process)
+
         row2.addWidget(self.export_button)
+        row2.addWidget(self.signal_processing)
         row2.addStretch(1)
 
-        self.add_plot_button = QPushButton("Add Plot")
+        self.active_plots = {}
+        self.plot_actions = {}
+
+        self.add_plot_button = QPushButton("Add/Remove Plots")
+        self.add_plot_button.setCursor(Qt.PointingHandCursor)
         self.add_plot_button.setFixedWidth(150)
         self.add_plot_button.setFixedHeight(25)
         self.add_plot_button.setStyleSheet("color: white; background-color: #3498DB;")
         self.add_plot_menu = QMenu(self)
+        self.add_plot_menu.setCursor(Qt.PointingHandCursor)
 
-        plot_types = ["Time Series", "FFT"]
+        plot_types = ["Time Series", "Polar FFT", "FFT"]
         for plot_type in plot_types:
             action = QAction(plot_type, self)
-            action.triggered.connect(lambda checked, p=plot_type: self.add_plot(p))
+            action.setCheckable(True)
+            action.toggled.connect(lambda checked, pt=plot_type: self.toggle_plot(pt, checked))
+            self.plot_actions[plot_type] = action
             self.add_plot_menu.addAction(action)
+            self.add_plot_menu.setStyleSheet("""QMenu::indicator:checked {
+                                                    background-color: #3498DB;
+                                                    border: 1px solid #3498DB;
+                                                    border-radius: 3px;
+                                                    width: 12px;
+                                                    height: 12px;
+                                                }
+                                                
+                                                QMenu::indicator:checked:disabled {
+                                                    background-color: #666666;
+                                                }
+                                                
+                                                QMenu::indicator:unchecked {
+                                                    background-color: transparent;
+                                                    border: 1px solid #5d5b59;
+                                                    border-radius: 3px;
+                                                    width: 12px;
+                                                    height: 12px;
+                                                }""")
 
         self.add_plot_button.setMenu(self.add_plot_menu)
         row2.addWidget(self.add_plot_button)
@@ -144,25 +187,25 @@ class MainWindow(QMainWindow):
         pixmap = QPixmap("resources\Icon.png").scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         icon_label.setPixmap(pixmap)
 
-        welcome_label = QLabel(
+        self.welcome_label = QLabel(
             "<br><br><br>"
             "<span style='font-size: 24px; color: #1E2A38;'>Welcome to GH05T EEG Visualizer!</span><br><br>"
-            "This GUI is designed to help you visualize EEG data and connect to Bluetooth devices.<br>"
-            "You can upload your EEG data files or pair the app with a compatible Bluetooth device.<br><br>"
+            "This GUI is designed to help you visualize EEG data and connect to Bluetooth/Wifi devices.<br>"
+            "You can upload your EEG data files or pair the app with a compatible Bluetooth/Wifi device.<br><br>"
             "Instructions:<br>"
             "- Use the 'Data Input' dropdown in the top bar to upload data or connect a Bluetooth device.<br><br>"
             "Click the link below to view the source code and report any issues!<br>"
             "Github Repository: <a href='https://github.com/Keith-Khadar/Gh05t' style='color: #1E2A38; font-weight:bold;'> https://github.com/Keith-Khadar/Gh05t</a>"
         )
-        welcome_label.setAlignment(Qt.AlignLeft)
-        welcome_label.setStyleSheet("color: #1E2A38; font-size: 16px; font-weight:bold;")
-        welcome_label.setTextFormat(Qt.RichText)
-        welcome_label.setWordWrap(True)
-        welcome_label.setOpenExternalLinks(True)
+        self.welcome_label.setAlignment(Qt.AlignLeft)
+        self.welcome_label.setStyleSheet("color: #1E2A38; font-size: 16px; font-weight:bold;")
+        self.welcome_label.setTextFormat(Qt.RichText)
+        self.welcome_label.setWordWrap(True)
+        self.welcome_label.setOpenExternalLinks(True)
 
         welcome_layout.addStretch(1)
         welcome_layout.addWidget(icon_label)
-        welcome_layout.addWidget(welcome_label)
+        welcome_layout.addWidget(self.welcome_label)
         welcome_layout.addStretch(1)
         
         self.welcome_widget = QWidget()
@@ -188,17 +231,27 @@ class MainWindow(QMainWindow):
 
         self.data_loaded = False
         self.ble_reading = False
+        self.websocket_reading = False
         self.play_animation = False
         self.play_rt_animation = False
         self.paused_rt = False
         self.fft_rt = False
+        self.polar = False
 
         self.plot_manager = PlotManager(self.row3)
 
-        self.plots = []
         self.channel_names = []
+        self.sampling_rate = 0
         self.data = np.empty((0, 3))
         self.time = np.empty((0, 1))
+
+# ------------------- HANDLE DATA INPUT TYPE ------------------- #
+    def mousePressEvent(self, event):
+        """Handle title label click event"""
+        if event.button() == Qt.LeftButton:
+            if self.title_label.underMouse():
+                self.reset_application(event)
+        super().mousePressEvent(event)
 
     def handle_file_input(self):
         '''Opens a file dialog to upload data from a file.'''
@@ -209,17 +262,45 @@ class MainWindow(QMainWindow):
         if file_path:
             self.row2_widget.setVisible(True)
             self.statusBar().showMessage(f"Selected file: {file_path}")
-            self.data, self.time, self.channel_names = load_file(file_path)
+            self.data, self.time, self.channel_names, self.sampling_rate = load_file(file_path)
+            self.plot_manager.sampling_rate = self.sampling_rate
 
             self.clear_layout(self.row3_layout)
             self.data_loaded = True
+
+    def websocket_input(self):
+        '''Connects to Websocket port.'''
+        if self.ble_reading:
+            self.ble_worker.disconnect()
+
+        if not hasattr(self, 'web_socket'):
+            self.clear_layout(self.row3_layout)
+
+            self.real_time = PlotManager(self.row3)
+            self.real_time.web_socket = True
+            self.row3_layout.addWidget(self.real_time.canvas)
+            row_splitter = QSplitter(Qt.Horizontal)
+            row_splitter.addWidget(self.real_time.canvas)
+            self.row3.addWidget(row_splitter)
+
+            self.status_bar.showMessage("Connecting to Web Port...")
+            self.websocket = EEGWebSocket()
+            self.websocket.data_received.connect(self.handle_real_time)
+            self.websocket.start()
+
+            self.websocket.status_update_signal.connect(self.update_status_bar)
+            self.websocket.connection_failed_signal.connect(self.handle_connection_failed)
+
+            self.websocket_reading = True
+            self.row2_widget.setVisible(True)
 
     def handle_real_time_ble_input(self):
         """Initialize BLE connection and start real-time data handling."""
         if not hasattr(self, 'ble_worker'):
             self.clear_layout(self.row3_layout)
-
+            
             self.real_time = PlotManager(self.row3)
+            self.real_time.ble_reading = True
             self.row3_layout.addWidget(self.real_time.canvas)
             row_splitter = QSplitter(Qt.Horizontal)
             row_splitter.addWidget(self.real_time.canvas)
@@ -237,6 +318,14 @@ class MainWindow(QMainWindow):
         
             self.ble_reading = True
             self.row2_widget.setVisible(True)
+
+            if "Time Series" in self.plot_actions:
+                self.plot_actions["Time Series"].setVisible(not self.ble_reading)
+        
+            if "FFT" in self.plot_actions:
+                self.plot_actions["FFT"].setVisible(True)
+            if "Polar FFT" in self.plot_actions:
+                self.plot_actions["Polar FFT"].setVisible(True)
     
     def handle_connection_failed(self):
         """Handle connection failure and update the ble_reading status."""
@@ -248,24 +337,24 @@ class MainWindow(QMainWindow):
         :param message: The message to display in the status bar."""
         self.statusBar().showMessage(message)
 
-    def handle_real_time(self, ble_timestamp, ble_data):
+# ------------------- HANDLE REAL TIME INCOMING DATA ------------------- #
+    def handle_real_time(self, timestamp, data):
         """Process incoming BLE data and update the plot.
         
         :param ble_timestamp: The timestamp of the incoming data.
         :param ble_data: The incoming data."""
-        if ble_data is None:
+        if data is None:
             return
     
-        self.data = ble_data
-        self.time = ble_timestamp
+        self.data = data
+        self.time = timestamp
 
-        ble_data = np.array(ble_data).reshape((8, 1))
+        ble_data = np.array(data).reshape((8, 1))
 
-        if self.fft_rt:
-            self.row3_layout.addWidget(self.real_fft.canvas)
-            self.real_time.plot_fft(ble_data)
-
-        self.real_time.handle_real_time_data(ble_data, ble_timestamp)
+        self.real_time.handle_real_time_data(data, timestamp)
+        for plot_type in list(self.active_plots.keys()):
+            real_fft, splitter = self.active_plots[plot_type]
+            real_fft.handle_real_time_data(data, timestamp)
 
         if not self.play_rt_animation and not self.paused_rt:
             print("Starting real-time animation...")
@@ -276,23 +365,25 @@ class MainWindow(QMainWindow):
 
     def play_data_stream(self):
         """Start the animation for all applicable plots."""
-        if len(self.plots) == 0 and not self.ble_reading:
+        if len(self.active_plots) == 0 and not self.ble_reading:
             self.statusBar().showMessage("No plots to animate!")
             return
 
         if self.data_loaded and not self.play_animation:
             self.statusBar().showMessage("Playing data stream...")
-            for plot in self.plots:
-                if plot.plot_type == "Time Series":
-                    plot.play_time(self.data, self.channel_names)
-                elif plot.plot_type == "FFT":
-                     plot.play_fft(self.data)
+            for plot_mgr, _ in self.active_plots.values():
+                if plot_mgr.plot_type == "Time Series":
+                    plot_mgr.play_time(self.data, self.channel_names)
+                elif plot_mgr.plot_type == "Polar FFT":
+                    plot_mgr.play_fft(self.data)
+                elif plot_mgr.plot_type == "FFT":
+                    plot_mgr.play_fft(self.data)
             self.play_button.setText("Stop Data Stream")
             self.play_animation = True
         elif self.play_animation and self.data_loaded:
             self.statusBar().showMessage("Stopping data stream...")
-            for plot in self.plots:
-                plot.stop_animation()
+            for plot_mgr, _ in self.active_plots.values():
+                plot_mgr.stop_animation()
             self.play_button.setText("Start Data Stream")
             self.play_animation = False
         elif self.play_rt_animation and self.ble_reading:
@@ -328,38 +419,142 @@ class MainWindow(QMainWindow):
             else:
                 self.status_bar.showMessage("Export failed!", 3000)
                 
+    def toggle_plot(self, plot_type, checked):
+        """Handle plot visibility based on checkbox state"""
+        if checked:
+            self.add_plot(plot_type)
+        else:
+            self.remove_plot(plot_type)
+
     def add_plot(self, plot_type):
-        """Dynamically add a new plot to a resizable grid.
+        """Create and show a new plot if not already exists"""
+        if plot_type in self.active_plots:
+            return
+            
+        plot_mgr = PlotManager(self.row3)
+        plot_mgr.plot_type = plot_type
         
-        :param plot_type: The type of plot to add."""
-        if plot_type == "FFT" and self.ble_reading:
-            new_plot = self.real_fft
-            self.fft_rt = True
-        else:
-            new_plot = PlotManager(self.row3)
-            new_plot.plot_type = plot_type
-
-            if plot_type == "Time Series":
-                new_plot.plot_data(self.data, self.time, self.channel_names, plot_type)
-                self.statusBar().showMessage("Loaded Time Series Plot")
-            elif plot_type == "FFT":
-                new_plot.plot_data(self.data, self.time, self.channel_names, plot_type)
-                self.statusBar().showMessage("Loaded FFT Plot")
-
-        if self.row3.count() == 0:
-            row_splitter = QSplitter(Qt.Horizontal)
-            row_splitter.addWidget(new_plot.canvas)
-            self.row3.addWidget(row_splitter)
-        else:
-            last_row = self.row3.widget(self.row3.count() - 1)
-            if last_row.count() < 2:
-                last_row.addWidget(new_plot.canvas)
+        if plot_type == "Time Series":
+            plot_mgr.plot_data(self.data, self.time, self.channel_names, 
+                              self.sampling_rate, plot_type)
+        elif plot_type in ["Polar FFT", "FFT"]:
+            if self.ble_reading:
+                plot_mgr.real_fft = self.real_fft
+                plot_mgr.ble_reading = True
+                plot_mgr.fft_rt = True
+                plot_mgr.plot_type = plot_type
+                plot_mgr.plot_data(self.data, self.time, self.channel_names, self.sampling_rate, plot_type)
             else:
-                row_splitter = QSplitter(Qt.Horizontal)
-                row_splitter.addWidget(new_plot.canvas)
-                self.row3.addWidget(row_splitter)
+                plot_mgr.plot_data(self.data, self.time, self.channel_names, self.sampling_rate, plot_type)
+        
+        splitter = self.find_or_create_splitter()
+        splitter.addWidget(plot_mgr.canvas)
+        
+        self.active_plots[plot_type] = (plot_mgr, splitter)
+        self.statusBar().showMessage(f"Added {plot_type} plot")
 
-        self.plots.append(new_plot)
+    def remove_plot(self, plot_type):
+        """Remove an existing plot"""
+        if plot_type not in self.active_plots:
+            return
+            
+        plot_mgr, splitter = self.active_plots[plot_type]
+
+        if hasattr(plot_mgr, 'animt') and plot_mgr.animt is not None:
+            plot_mgr.animt.event_source.stop()
+            plot_mgr.animt = None
+
+        if hasattr(plot_mgr, 'animf') and plot_mgr.animf is not None:
+            plot_mgr.animf.event_source.stop()
+            plot_mgr.animf = None
+
+        plot_mgr.canvas.setParent(None)
+        plot_mgr.canvas.deleteLater()
+        
+        del self.active_plots[plot_type]
+        self.statusBar().showMessage(f"Removed {plot_type} plot")
+
+    def find_or_create_splitter(self):
+        """Manage splitter layout organization"""
+        if self.row3.count() == 0:
+            new_splitter = QSplitter(Qt.Horizontal)
+            self.row3.addWidget(new_splitter)
+            return new_splitter
+            
+        last_splitter = self.row3.widget(self.row3.count() - 1)
+        if last_splitter.count() < 3:
+            return last_splitter
+            
+        new_splitter = QSplitter(Qt.Horizontal)
+        self.row3.addWidget(new_splitter)
+        return new_splitter
+    
+    def copy_rt(self):
+        self.data = self.real_time.return_rt_data()
+    
+    def reset_application(self, event):
+        """Reset the application to its initial state"""
+        for plot_type in list(self.active_plots.keys()):
+            self.remove_plot(plot_type)
+
+        if self.play_animation or self.play_rt_animation:
+            self.play_data_stream()
+        
+        self.data = np.empty((0, 3))
+        self.time = np.empty((0, 1))
+        self.data_loaded = False
+        self.ble_reading = False
+        self.websocket_reading = False
+        
+        self.row2_widget.setVisible(False)
+        self.statusBar().showMessage("Back to Home")
+
+        welcome_layout = QHBoxLayout()
+
+        icon_label = QLabel()
+        pixmap = QPixmap("resources\Icon.png").scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        icon_label.setPixmap(pixmap)
+
+        self.welcome_label = QLabel(
+            "<br><br><br>"
+            "<span style='font-size: 24px; color: #1E2A38;'>Welcome to GH05T EEG Visualizer!</span><br><br>"
+            "This GUI is designed to help you visualize EEG data and connect to Bluetooth/Wifi devices.<br>"
+            "You can upload your EEG data files or pair the app with a compatible Bluetooth/Wifi device.<br><br>"
+            "Instructions:<br>"
+            "- Use the 'Data Input' dropdown in the top bar to upload data or connect a Bluetooth device.<br><br>"
+            "Click the link below to view the source code and report any issues!<br>"
+            "Github Repository: <a href='https://github.com/Keith-Khadar/Gh05t' style='color: #1E2A38; font-weight:bold;'> https://github.com/Keith-Khadar/Gh05t</a>"
+        )
+        self.welcome_label.setAlignment(Qt.AlignLeft)
+        self.welcome_label.setStyleSheet("color: #1E2A38; font-size: 16px; font-weight:bold;")
+        self.welcome_label.setTextFormat(Qt.RichText)
+        self.welcome_label.setWordWrap(True)
+        self.welcome_label.setOpenExternalLinks(True)
+
+        welcome_layout.addStretch(1)
+        welcome_layout.addWidget(icon_label)
+        welcome_layout.addWidget(self.welcome_label)
+        welcome_layout.addStretch(1)
+        
+        self.welcome_widget = QWidget()
+        self.welcome_widget.setLayout(welcome_layout)
+
+        self.row3_layout.setRowStretch(0, 1)
+        self.row3_layout.addWidget(self.welcome_widget, 1, 0, alignment=Qt.AlignCenter)
+        self.row3_layout.setRowStretch(2, 1)
+
+        self.row3_layout.addWidget(self.row3)
+
+        if hasattr(self, 'ble_worker'):
+            self.ble_worker.disconnect_ble()
+            del self.ble_worker
+        if hasattr(self, 'web_socket'):
+            self.web_socket.stop()
+            del self.web_socket
+        
+        # Reset plot checkboxes
+        for action in self.plot_actions.values():
+            action.setChecked(False)
 
     def clear_layout(self, layout):
         """Clear the layout of all widgets.

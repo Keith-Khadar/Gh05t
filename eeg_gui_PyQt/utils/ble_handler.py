@@ -32,7 +32,7 @@ class EEGBLE(QThread):
         notifications."""
         bleak_logger.info("Scanning for devices...")
         self.update_status.emit("Scanning for devices...")
-        devices = await BleakScanner.discover(timeout=5.0)
+        devices = await BleakScanner.discover(timeout=10.0)
         esp32_address = None
 
         for device in devices:

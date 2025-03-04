@@ -18,7 +18,7 @@ def load_file(file_path):
 
             time = np.arange(n_samples) / sampling_frequency
 
-        return np.array(signal_data), time, channel_names
+        return np.array(signal_data), time, channel_names, sampling_frequency
     except Exception as e:
         print(f"Error loading file with pyedflib: {e}")
         return None, None, None
