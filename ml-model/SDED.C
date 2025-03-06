@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>  // Include for timing
 
 #define M 10
 
@@ -23,14 +24,34 @@ void apply_sded(double x, double eff_dc, double alpha, double delta,
 // The arrays eff_dc, measures, and spikes must be preallocated (length n).
 void apply_sded_full(const double *x, int n, double alpha, double delta,
                      double *eff_dc, double *measures, int *spikes) {
-    // Initialize the first element.
+    // Initialize the first element
     eff_dc[0] = 0.0;
     measures[0] = 0.0;
     spikes[0] = 0;
-    
-    // Loop over the rest of the array.
+
+    // Timing variables
+    clock_t start, end;
+    double total_time = 0.0;
+
+    // Loop over the rest of the array
     for (int i = 1; i < n; i++) {
+        start = clock();  // Start timing
         apply_sded(x[i], eff_dc[i-1], alpha, delta, &eff_dc[i], &measures[i], &spikes[i]);
+        end = clock();    // End timing
+
+        // Compute elapsed time for this iteration
+        double elapsed = ((double)(end - start)) / CLOCKS_PER_SEC;
+        total_time += elapsed;
+    }
+
+    // Compute average time per iteration
+    double avg_time = total_time / (n - 1);
+    
+    // Log the result
+    FILE *log_fp = fopen("performance_log.txt", "a");  // Open log file in append mode
+    if (log_fp) {
+        fprintf(log_fp, "Processed %d iterations. Average time per apply_sded: %f seconds\n", n - 1, avg_time);
+        fclose(log_fp);
     }
 }
 
