@@ -1,0 +1,93 @@
+(kicad_sch
+	(version 20231120)
+	(generator "eeschema")
+	(generator_version "8.0")
+	(uuid "237f3b4a-1f79-4075-8dc8-67b2fcbd132d")
+	(paper "A4")
+	(title_block
+		(title "ADS1299 PCB Final")
+		(company "Gh05t")
+	)
+	(lib_symbols)
+	(sheet
+		(at 52.07 39.37)
+		(size 81.28 53.34)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "713cfc75-b94c-4821-ad9c-6d5f2067f91d")
+		(property "Sheetname" "Inputs & Filtering"
+			(at 52.07 38.6584 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "inputs_filtering.kicad_sch"
+			(at 52.07 93.2946 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ADS1299_PCB_Final"
+				(path "/237f3b4a-1f79-4075-8dc8-67b2fcbd132d"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 170.18 39.37)
+		(size 81.28 53.34)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0.0000)
+		)
+		(uuid "bcc3b0bf-0d36-451e-bad1-e48b587adf9f")
+		(property "Sheetname" "ADC & Microcontroller"
+			(at 170.18 38.6584 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "adc_microcontroller.kicad_sch"
+			(at 170.18 93.2946 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ADS1299_PCB_Final"
+				(path "/237f3b4a-1f79-4075-8dc8-67b2fcbd132d"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+)
