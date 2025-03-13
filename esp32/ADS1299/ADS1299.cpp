@@ -60,19 +60,20 @@ void ADS1299::initialize(int _DRDY, int _RST, int _CS, int _FREQ, boolean _isDai
 	// }
     // SPCR = (SPCR & ~SPI_CLOCK_MASK) | (DIVIDER);  // set SCK frequency  
     // SPSR = (SPSR & ~SPI_2XCLOCK_MASK) | (DIVIDER); // by dividing 16MHz system clock
+
+	// initalize the  data ready chip select and reset pins:
+	pinMode(DRDY, INPUT);
+	pinMode(CS, OUTPUT);
+	digitalWrite(CS,HIGH); 	
+	// digitalWrite(RST,HIGH);
     
 	// ESP32 SPI SETUP
-    SPI.begin(18, 19, 23, CS);
-	SPI.beginTransaction(SPISettings(2000000, MSBFIRST, SPI_MODE1));
+    SPI.begin(18, 19, 23, CS); // ESP32 Firebeetle
+	// SPI.begin(7, 8, 9, CS); // ESP-S3
+	// SPI.begin(19, 20, 18, CS); // ESP32-C6
+	SPI.beginTransaction(SPISettings(FREQ*1000000, MSBFIRST, SPI_MODE1));
     
     // **** ----- End of SPI Setup ----- **** //
-    
-    // initalize the  data ready chip select and reset pins:
-    pinMode(DRDY, INPUT);
-    pinMode(CS, OUTPUT);
-	
-	digitalWrite(CS,HIGH); 	
-	digitalWrite(RST,HIGH);
 }
 
 //System Commands

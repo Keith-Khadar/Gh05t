@@ -103,12 +103,11 @@ class EEGWebSocket(QThread):
         if len(self.sensor_data) >= 34:
             # sorted_data = [sensor_data[key] for key in sorted(sensor_data.keys(), key=lambda x: int(x[2:]) if x[2:].isdigit() else float('inf'))]
             
-            channel_data = [0] * 8  # Initialize a list with 8 elements
+            channel_data = np.zeros(8)  # Initialize a list with 8 elements
 
             for i in range(8):  
-                channel_key = f"CH{i}"  # Construct the key dynamically, e.g., "CH0", "CH1", etc.  
-                if channel_key in sensor_data:  # Check if the key exists in sensor_data  
-                    channel_data[i] = sensor_data[channel_key]  
+                channel_key = f"CH{i}" 
+                channel_data[i] = sensor_data[channel_key] 
 
             # packet = self.data_buffer[:36]  # Take first 36 bytes
             # self.data_buffer = self.data_buffer[36:]  # Remove processed bytes

@@ -36,7 +36,6 @@ class PlotManager:
         self.dt = 0
         self.n_plot = 2000
         self.sigbufs_plot = None
-        self.buffer_filled = False
 
         self.figure.patch.set_alpha(0)
         self.canvas.setStyleSheet("background:#85a0bb;")
@@ -177,20 +176,23 @@ class PlotManager:
     def real_time_stackplot(self, marray, seconds=None, ylabels=None, ax=None):
         """Plot stacked traces with dynamic per-channel scaling in fixed lanes"""
         numRows, numSamples = marray.shape
-        max_window_size = 10  # Seconds
+        max_window_size = 1  # Seconds
 
         # Time axis setup
         if numSamples == 1:
             t = np.array([0, 1])
             marray = np.hstack((marray, marray))
         else:
-            t = np.linspace(0, seconds, numSamples, dtype=float) if seconds else np.arange(numSamples, dtype=float)
+            t = np.array(self.time_buffer[-numSamples:])
 
         # Window management
         if not hasattr(self, 'x_window'):
             self.x_window = list(t)
         else:
             self.x_window.append(t[-1])
+
+        if len(self.x_window) > max_window_size * 100:
+            self.x_window = self.x_window[-int(max_window_size * 100):]
 
         window_start = self.x_window[0]
         window_end = self.x_window[-1]
@@ -215,7 +217,6 @@ class PlotManager:
         lane_height = 800   # mV vertical range per channel
         ylim_padding = 200  # mV padding at top/bottom
         
-        # Initialize scaling parameters if not exists
         if not hasattr(self, 'channel_scales'):
             self.channel_scales = [1.0] * numRows
             self.channel_offsets = [0.0] * numRows
@@ -231,65 +232,53 @@ class PlotManager:
         ticklocs = []
         
         for i in range(numRows):
-            # Get current channel data
             ch_data = marray_mv[i]
             
-            # Calculate dynamic scaling parameters
             data_min = np.min(ch_data)
             data_max = np.max(ch_data)
             data_center = (data_max + data_min) / 2
             data_range = data_max - data_min
-            
-            # Prevent division by zero (initial case)
+
             if data_range == 0:
                 data_range = 1
                 
-            # Calculate scaling parameters
             self.channel_scales[i] = lane_height / data_range
             self.channel_offsets[i] = i * base_offset
             self.channel_centers[i] = data_center
             
-            # Scale and center data
             scaled_data[i] = (ch_data - data_center) * self.channel_scales[i] + self.channel_offsets[i]
             
             ticklocs.append(i * base_offset)
 
-        # Create line segments
         segs = [np.column_stack((t, scaled_data[i])) for i in range(numRows)]
         
         if ax is None:
             ax = self.ax
         ax.clear()
 
-        # Plot data
         lines = LineCollection(segs, colors='black')
         ax.add_collection(lines)
 
-        # Draw lane boundaries
         for i in range(numRows):
             y_center = i * base_offset
             ax.axhspan(y_center - lane_height/2, 
                     y_center + lane_height/2, 
                     facecolor='#f0f0f0', alpha=0.2)
             
-            # Add compact range label
             range_half = lane_height/(2*self.channel_scales[i])
             ax.text(window_start + 0.1, y_center, 
                     f'±{range_half:.0f}',
                     va='center', ha='left', 
                     fontsize=7, color='#666666')
 
-        # Vertical line initialization
         if self.vertical_line is None:
             self.vertical_line = ax.axvline(x=new_x, color='r', 
                                         linestyle='--', linewidth=0.5, picker=10)
         else:
             self.vertical_line.set_xdata([new_x])
 
-        # Store current position for next update
         self.vertical_line_x = new_x
 
-        # Axis configuration
         y_min = -lane_height/2 - ylim_padding
         y_max = (numRows-1)*base_offset + lane_height/2 + ylim_padding
         ax.set_xlim(window_start, window_end)
@@ -299,11 +288,10 @@ class PlotManager:
         ax.set_xlabel('Time (s)')
         ax.set_ylabel('Scaled Voltage')
 
-        # Store current data state
-        self.current_marray = marray_mv  # Store original data for annotations
+        self.current_marray = marray_mv
         self.current_t = t
         self.current_ticklocs = ticklocs
-        self.channel_scales = self.channel_scales  # Make available for annotations
+        self.channel_scales = self.channel_scales
         self.channel_centers = self.channel_centers
 
         self.update_annotations(new_x, marray_mv, t, ticklocs)
@@ -407,14 +395,14 @@ class PlotManager:
             theta = np.linspace(0, 2*np.pi, len(freqs))
             for i in range(magnitudes.shape[0]):
                 ax.plot(theta, magnitudes[i], label=self.channel_names[i])
-            ax.set_ylim(0, 7000)
+            ax.set_ylim(0, 5000)
         else:
             for i in range(magnitudes.shape[0]):
                 ax.plot(freqs, magnitudes[i], label=self.channel_names[i])
             
             ax.set_xlim(0.1, 80)
             max_mag = np.max(magnitudes) if magnitudes.size > 0 else 1
-            ax.set_ylim(0, 7000)
+            ax.set_ylim(0, 5000)
             ax.grid(True)
             ax.set_xlabel('Frequency (Hz)')
             ax.set_ylabel('Magnitude (µV²/Hz)')
@@ -557,7 +545,7 @@ class PlotManager:
 
         self.canvas.draw()
 
-    def play_time(self, data, channel_names, interval=200):
+    def play_time(self, data, channel_names, interval=50):
         """Start the animation with looping enabled.
         
         :param data: 2D array of shape (numRows, numSamples) containing the data to plot.
@@ -577,7 +565,7 @@ class PlotManager:
         )
         self.canvas.draw()
 
-    def play_fft(self, data, interval=200):
+    def play_fft(self, data, interval=50):
         """Start the animation with looping enabled.
         
         :param data: 2D array of shape (numRows, numSamples) containing the data to plot.
@@ -610,7 +598,7 @@ class PlotManager:
             self.animt = animation.FuncAnimation(
                 self.figure, 
                 self.real_time_animate, 
-                interval=100,
+                interval=1,
                 blit=True,
                 cache_frame_data=False
             )
@@ -620,7 +608,7 @@ class PlotManager:
             self.animf = animation.FuncAnimation(
                 self.figure, 
                 self.real_fft_animate, 
-                interval=100,
+                interval=1,
                 blit=True,
                 cache_frame_data=False
             )
@@ -644,7 +632,7 @@ class PlotManager:
 
             self.real_time_stackplot(
                 self.data_rt, 
-                seconds=self.time_buffer[-1] - self.time_buffer[0],  
+                seconds=self.time_buffer[-1],  
                 ylabels=[f'Ch{i+1}' for i in range(self.data_rt.shape[0])],  
                 ax=self.ax  
             )
@@ -656,7 +644,7 @@ class PlotManager:
         if self.data_rt.size == 0:
             return []
         
-        window_samples = int(10 * self.sampling_rate)  # 10-second window
+        window_samples = int(1 * self.sampling_rate)
         if self.data_rt.shape[1] > window_samples:
             fft_data = self.data_rt[:, -window_samples:]
         else:
@@ -682,25 +670,17 @@ class PlotManager:
         if not self.ble_reading:
             self.ble_reading = True
 
-        timestamp = timestamp / 1000.0
+        timestamp_s = timestamp / 1000.0
 
         if self.data_rt.size == 0:
             self.data_rt = new_data
         else:
-            self.data_rt = np.hstack((self.data_rt, new_data))
+            self.data_rt = np.hstack((self.data_rt, new_data.reshape(8, 1)))[:, -self.n_plot:]
 
         if self.time_buffer.size == 0:
-            self.time_buffer = np.array([timestamp])
+            self.time_buffer = np.array([timestamp_s])
         else:
-            self.time_buffer = np.hstack((self.time_buffer, [timestamp]))
-
-        if not self.buffer_filled and self.data_rt.shape[1] >= self.n_plot:
-            self.buffer_filled = True
-            print("Buffer filled!")
-
-        if self.data_rt.shape[1] > self.n_plot:
-            self.data_rt = self.data_rt[:, -self.n_plot:]
-            self.time_buffer = self.time_buffer[-self.n_plot:]
+            self.time_buffer = np.append(self.time_buffer[-self.n_plot:], timestamp_s)
 
         # self.canvas.draw_idle()
 

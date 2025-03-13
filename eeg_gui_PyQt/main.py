@@ -1,14 +1,14 @@
 import sys
-import asyncio
+import os
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, 
-    QStatusBar, QMenu, QAction, QGridLayout, QSplitter, QMessageBox, QComboBox
+    QStatusBar, QMenu, QAction, QGridLayout, QSplitter
 )
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase
 import numpy as np
-from utils import PlotManager, EEGWebSocket, load_file, export_rt_data, export_data, BLEWorker, EEGBLE
+from utils import PlotManager, EEGWebSocket, load_file, BLEWorker, SignalProcessingWindow, FileHandler
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -126,7 +126,7 @@ class MainWindow(QMainWindow):
         self.signal_processing.setFixedWidth(150)
         self.signal_processing.setFixedHeight(25)
         self.signal_processing.setStyleSheet("color: white; background-color: #3498DB;")
-        # self.signal_processing.clicked.connect(self.signal_process)
+        self.signal_processing.clicked.connect(self.open_signal_processing_window)
 
         row2.addWidget(self.export_button)
         row2.addWidget(self.signal_processing)
@@ -239,8 +239,9 @@ class MainWindow(QMainWindow):
         self.polar = False
 
         self.plot_manager = PlotManager(self.row3)
+        self.file_handler = FileHandler()
 
-        self.channel_names = []
+        self.channel_names = ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7", "Ch8"]
         self.sampling_rate = 0
         self.data = np.empty((0, 3))
         self.time = np.empty((0, 1))
@@ -349,7 +350,10 @@ class MainWindow(QMainWindow):
         self.data = data
         self.time = timestamp
 
-        ble_data = np.array(data).reshape((8, 1))
+        new_data = np.array(data).reshape((8, 1))
+        timestamp_s = timestamp / 1000.0
+
+        self.file_handler.add_data(timestamp, new_data.flatten())
 
         self.real_time.handle_real_time_data(data, timestamp)
         for plot_type in list(self.active_plots.keys()):
@@ -406,18 +410,20 @@ class MainWindow(QMainWindow):
         
         if file_path:
             if self.ble_reading:
-                data_rt, time_rt = self.real_time.return_rt_data()
-                data_rt = np.array(data_rt)
-                if self.channel_names is None or len(self.channel_names) == 0:
-                    self.channel_names = [f"Channel {i + 1}" for i in range(data_rt.shape[0])]
-                success = export_rt_data(file_path, data_rt, time_rt, self.channel_names)
+                success = self.file_handler.export_data(file_path, self.channel_names, mode='full')
             else: 
-                success = export_data(file_path, self.data, self.time, self.channel_names)
+                success = self.file_handler.export_data(file_path, self.channel_names, mode='full')
 
             if success:
                 self.status_bar.showMessage("Export successful!", 3000)
             else:
                 self.status_bar.showMessage("Export failed!", 3000)
+    
+    def open_signal_processing_window(self):
+        """Open the signal processing window and connect its signals"""
+        self.signal_processing_window = SignalProcessingWindow(self)
+
+        self.signal_processing_window.exec_()
                 
     def toggle_plot(self, plot_type, checked):
         """Handle plot visibility based on checkbox state"""
@@ -496,9 +502,6 @@ class MainWindow(QMainWindow):
         """Reset the application to its initial state"""
         for plot_type in list(self.active_plots.keys()):
             self.remove_plot(plot_type)
-
-        if self.play_animation or self.play_rt_animation:
-            self.play_data_stream()
         
         self.data = np.empty((0, 3))
         self.time = np.empty((0, 1))
@@ -546,11 +549,21 @@ class MainWindow(QMainWindow):
         self.row3_layout.addWidget(self.row3)
 
         if hasattr(self, 'ble_worker'):
-            self.ble_worker.disconnect_ble()
+            self.ble_worker.disconnect()
             del self.ble_worker
         if hasattr(self, 'web_socket'):
             self.web_socket.stop()
             del self.web_socket
+
+        if self.ble_reading:
+            if hasattr(self.real_time, 'animt') and self.real_time.animt is not None:
+                self.real_time.animt.event_source.stop()
+                self.real_time.animt = None
+
+            self.real_time.canvas.setParent(None)
+            self.real_time.canvas.deleteLater()
+            
+            del self.real_time
         
         # Reset plot checkboxes
         for action in self.plot_actions.values():
@@ -577,7 +590,13 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         """Close the window and disconnect the BLE worker."""
         if self.ble_reading is None:
-            self.ble_worker.disconnect_ble()
+            self.ble_worker.disconnect()
+        
+        bin_file = "data/raw_data.bin"
+        self.file_handler.stop()
+        if os.path.exists(bin_file):
+            os.remove(bin_file)
+
         self.close()
         print('Window closed')
 
