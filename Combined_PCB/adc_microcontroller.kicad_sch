@@ -4563,7 +4563,7 @@
 		(uuid "03941d21-e3ea-4b50-acd6-ca0e9a70763d")
 	)
 	(label "GPIO4"
-		(at 220.98 40.64 0)
+		(at 220.98 33.02 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4693,7 +4693,7 @@
 		(uuid "31d8d1b5-a669-4b7f-a76f-492061527960")
 	)
 	(label "GPIO1"
-		(at 220.98 33.02 0)
+		(at 220.98 40.64 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5073,7 +5073,7 @@
 		(uuid "c90c2baf-1cdf-41fc-b3c8-b979daa1fd32")
 	)
 	(label "GPIO2"
-		(at 220.98 35.56 0)
+		(at 220.98 38.1 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5153,7 +5153,7 @@
 		(uuid "eb510ebd-4fd1-4469-9994-cf94a87556b1")
 	)
 	(label "GPIO3"
-		(at 220.98 38.1 0)
+		(at 220.98 35.56 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7333,7 +7333,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x18_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x18_P2.54mm_Vertical"
 			(at 242.57 48.26 0)
 			(effects
 				(font
@@ -7450,7 +7450,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x18_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x18_P2.54mm_Vertical"
 			(at 234.95 50.8 0)
 			(effects
 				(font
