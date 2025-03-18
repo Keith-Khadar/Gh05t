@@ -57,5 +57,5 @@ Regularly check the integrity of the solder connections and adjust the electrode
 The design of the electrode and board covers is being worked upon.
 
 ## Credit
-This design is inspired by and builds upon the open-source EEG headset designs from OpenBCI, [https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV)
+This design is inspired by and builds upon the open-source EEG headset designs from OpenBCI, [https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV](https://github.com/OpenBCI/Ultracortex/tree/master/Mark_IV). \
 Their contributions to the neurotechnology community are invaluable.
