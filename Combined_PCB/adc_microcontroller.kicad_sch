@@ -2965,10 +2965,6 @@
 		(uuid "2b1bbb21-68af-430c-95ce-83eb7cfd9d6f")
 	)
 	(no_connect
-		(at 256.54 40.64)
-		(uuid "344bf66d-6dfc-4668-8db1-258ac3dfa67d")
-	)
-	(no_connect
 		(at 220.98 55.88)
 		(uuid "3590ade7-88f0-4cec-a9d9-3d4c5ab22327")
 	)
@@ -3017,7 +3013,7 @@
 		(uuid "802f6fc3-834b-4f4f-958f-7ae5f7c40d5b")
 	)
 	(no_connect
-		(at 220.98 43.18)
+		(at 256.54 40.64)
 		(uuid "8a326947-df68-4595-953f-e36e67c2870d")
 	)
 	(no_connect
@@ -4822,6 +4818,16 @@
 		)
 		(uuid "61f3a8f0-6a2c-43e0-bffd-1a9689b9436b")
 	)
+	(label "CS"
+		(at 220.98 45.72 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "677e51ce-d592-447a-9532-b3e9b5cd543f")
+	)
 	(label "GPIO4"
 		(at 86.36 138.43 180)
 		(effects
@@ -4843,7 +4849,7 @@
 		(uuid "72c44e3a-65f5-40fb-9dab-559fc59836af")
 	)
 	(label "START"
-		(at 220.98 45.72 0)
+		(at 220.98 43.18 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -5012,7 +5018,7 @@
 		)
 		(uuid "ab692d6c-91dc-4b9c-8610-f7d0f0718f61")
 	)
-	(label "AGND"
+	(label "CS"
 		(at 33.02 54.61 0)
 		(effects
 			(font
