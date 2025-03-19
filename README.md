@@ -24,9 +24,9 @@ We provide various levels to users depending on cost, precision, and usability:
 
 \* The ADS1299 has the capabilities to daisy chain, therefore expanding the channel number from 8 to 16 but it is not implemented on the custom PCB. Refer to the ADS1299 PCB folder for additional information.
 
-[^1]: Refer to [Reading_EEG_Data\README.md](Reading_EEG_Data\README.md) for more information on the setup and specifics for the system.
-[^2]: Refer to [esp32\README.md](esp32\README.md) for more information on the setup and specifics for the system.
-[^3]: Refer to [rpi_low_cost\gh0st\README.md](rpi_low_cost\gh0st\README.md) for more information on the setup and specifics for the system.
+[^1]: Refer to [Reading_EEG_Data\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Reading_EEG_Data) for more information on the setup and specifics for the system.
+[^2]: Refer to [esp32\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/esp32) for more information on the setup and specifics for the system.
+[^3]: Refer to [rpi_low_cost\gh0st\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/rpi_low_cost/Gh0st) for more information on the setup and specifics for the system.
 
 ## Completed Work/In Progress for Milestone Release Candidate
 - **Working High Cost Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
@@ -41,11 +41,9 @@ We provide various levels to users depending on cost, precision, and usability:
 - **Signal Preprocessing** : The EEG signal preprocessing pipeline is fully implemented, ensuring artifact removal, filtering, and independent component extraction before further processing. FastICA, InfoMax, NLMS and VSS-APA are implemented to extract information components from raw EEG signals in real-time. 
 - **Event Detection/Prediction Model**: The EEG-based event detection pipeline and machine learning models have been developed to analyze real-time brain activity and infer motor function. NLMS, Batch-Wiener Filter and VSS-APA have been implemeted for predictions - Statistical Deviation Event Detection Model and Information Theoretic Learning Point Process Detection Models have been implemented for more sophisticed event flagging.
 
-___
-
 # Project Architecture
 
-#### <p align="center">**High Performance Development Board**[^1]</p>
+### <p align="center">**High Performance Development Board**[^1]</p>
 | <div style="width:400px">Hardware Architecture & Wiring</div> | Components | Communication Protocols |
 |--------|---------|---------|
 | ![High Performance Board](https://github.com/user-attachments/assets/ce3bbd09-0870-42f1-9bc7-f2d55ca7b32b) | - OpenBCI 3D Headset Design<br> - Button Snap Electrodes<br> - EEG ESP Development Board with ESP32-S3 <br> - XIAO ESP32-C6<br> | - SPI communication between ADS1299 chip and ESP32-S3<br> - ESP-NOW WiFi data transmission between Development Board and ESP32-C6<br> - UART serialized data transmission through USB-C connection between ESP32-C6 and computer receiver <br> |
@@ -53,7 +51,7 @@ ___
 - **Software**
   - Once the ESP32-C6 captures the incoming EEG data from the ESP32-S3, the UART data is captured through a python script. The data is then transcribed into a OpenBCI formatted txt file to visualize through **OpenBCI GUI**.
 
-#### <p align="center">**Balanced Performance Board**[^2]</p>
+### <p align="center">**Balanced Performance Board**[^2]</p>
 | <div style="width:600px">Hardware Architecture & Wiring</div> | Components | Communication Protocols |
 |--------|---------|---------|
 | <img src="https://github.com/user-attachments/assets/90f90b59-3fc4-4933-9542-4793f8f74661" alt="drawing" width="1000" style/> | - OpenBCI 3D Headset Design<br> - 3D Printed Claw  Electrodes<br> - Custom ADS1299 PCB<br> - DFRobot Firebeetle ESP32 32D <br> | - SPI communication between the ADS1299 PCB and Firebeetle ESP32 <br> - BLE data transmission between the Firebeetle ESP32 and computer receiver <br> |
@@ -61,21 +59,21 @@ ___
 - **Software**
   - Once the Firebeetle ESP32 is supplied power, the BLE server is turned on and ready to transmit data to any device that connects to the server. The **GH05T GUI** is used to connect to the BLE server and read incoming real-time data. 
 
-#### <p align="center">**Low Cost Filtering Circuit**[^3]</p>
+### <p align="center">**Low Cost Filtering Circuit**[^3]</p>
 | <div style="width:500px">Hardware Architecture & Wiring</div> | Components | Communication Protocols |
 |--------|---------|---------|
 | <img src="https://github.com/user-attachments/assets/0a12550a-8cac-404f-81ee-4bf6df63b5ae" alt="drawing" width="600" style/> | - Custom Filtering and Component Circuit on breadboard/featherboard <br> - Raspberry Pi Pico W <br> | - TCP WebSocket data transmission between Raspberry Pi Pico W and computer receiver |
 - **Software**
   - Once the Raspberry Pi Pico W is supplied power,TCP WebSocket is opened and transmits data to any device that connects to the server. The **GH05T GUI** is used to connect to the WebSocket server and read incoming real-time data. 
 
-#### <p align="center">**GH05T Graphic User Interface**[^4]</p>
+### <p align="center">**GH05T Graphic User Interface**[^4]</p>
 | <div style="width:300px">Function and Feature Architecture</div> | Visuals/GUI |
 |--------|--------|
 | ![GUI Flow](https://github.com/user-attachments/assets/a9a500f8-1eae-45d4-b21f-32e67913ea0e) | ![GUI Flow](https://github.com/user-attachments/assets/ed05217e-f655-4535-b095-f2ec6a256eff)  [PyQt](https://doc.qt.io/qtforpython-6/) & [Matplotlib](https://matplotlib.org/): Widget and EEG Data Visualization|
 
-[^4]: Refer to [eeq_gui_PyQt\README.md](eeq_gui_PyQt\README.md) for more information on the setup and specifics on the GUI.
+[^4]: Refer to [eeq_gui_PyQt\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/eeg_gui_PyQt) for more information on the setup and specifics on the GUI.
 
-#### <p align="center">**Signal Processing and Machine Learning**[^5]</p>
+### <p align="center">**Signal Processing and Machine Learning**[^5]</p>
 - **EEG Signal Pre-processing**:
   - Format:
     - Input: Raw 4 channel electrode data
@@ -95,9 +93,7 @@ ___
     - Pre-Training: PCA-Pretraining for optimal features
     - Training: Network Tuning based on Target Data
 
-[^5]: Refer to [signal-processing\README.md](signal-processing\README.md) and [ml-model\README.md]([ml-model\README.md) for more information on the setup and specifics.
-
-___
+[^5]: Refer to [signal-processing\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/signal-preprocessing) and [ml-model\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/ml-model) for more information on the setup and specifics.
 
 ## Known Bugs
 - **DFRobot Firebeetle ESP32 SPI reading**: The ESP32 requires repeated plugging in and out until it properly read the registers in the ADS1299. We suspect this could be a power issue which will be fixed in the upcoming new PCB design. 
