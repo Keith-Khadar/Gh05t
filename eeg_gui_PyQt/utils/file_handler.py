@@ -18,12 +18,12 @@ class FileHandler:
         self.worker_thread.start()
 
     def _write_worker(self):
-        """Background thread for writing data to disk."""
         with open(self.raw_file_path, 'ab') as f:
             while self.running:
                 try:
                     data_batch = []
                     while len(data_batch) < 100:
+                        # Modified to accept (timestamp, channels, label)
                         data = self.data_queue.get(timeout=0.1)
                         data_batch.append(data)
                 except Empty:
@@ -31,23 +31,23 @@ class FileHandler:
                 
                 if data_batch:
                     packed = b''
-                    for timestamp, channels in data_batch:
-                        if channels.size != 8:
-                            print(f"Invalid channel data length: {channels.size} (expected 8)")
-                            continue
-                        packed += struct.pack('<I8f', timestamp, *channels)
+                    for timestamp, channels, label in data_batch:
+                        # Pack with label flag (1=has label, 0=no label)
+                        has_label = 1 if label is not None else 0
+                        label_value = label if has_label else 0.0
+                        packed += struct.pack(
+                            '<I8fBf',  # New format: timestamp, 8 channels, flag, label
+                            timestamp,
+                            *channels,
+                            has_label,
+                            label_value
+                        )
                     f.write(packed)
                     f.flush()
 
-    def add_data(self, timestamp, channels):
-        """Add new data to the write queue (non-blocking).
-        
-        :param timestamp: Integer representing the timestamp of the new data.
-        :param channels: NumPy array of shape (8,) containing the channel data."""
-        if channels.size != 8:
-            print(f"Invalid channel data length: {channels.size} (expected 8)")
-            return
-        self.data_queue.put((timestamp, channels))
+    def add_data(self, timestamp, channels, label=None):
+        """Add new data to the write queue (non-blocking)."""
+        self.data_queue.put((timestamp, channels, label))
 
     def stop(self):
         """Stop the background writer and clean up."""
@@ -55,35 +55,46 @@ class FileHandler:
         self.worker_thread.join()
 
     def export_data(self, file_path, channel_names, mode='full'):
-        """Export data to a CSV file.
-        
-        :param file_path: The path to the CSV file.
-        :param channel_names: The channel names to export.
-        :param mode: 'full' to export all data or 'append' to append real-time data.
-        :return: True if the data was successfully exported, False otherwise."""
         try:
             if mode == 'full':
                 with open(self.raw_file_path, 'rb') as f:
                     content = f.read()
                 
-                n_samples = len(content) // 36
+                entry_size = 41
+                n_samples = len(content) // entry_size
+                
                 timestamps = []
                 data = np.zeros((8, n_samples), dtype=float)
+                labels = np.full(n_samples, np.nan, dtype=float)
                 
                 for i in range(n_samples):
-                    chunk = content[i*36 : (i+1)*36]
-                    ts = struct.unpack('<I', chunk[:4])[0]
-                    channels = struct.unpack('<8f', chunk[4:36])
+                    chunk = content[i*entry_size : (i+1)*entry_size]
+                    unpacked = struct.unpack('<I8fBf', chunk)
+                    ts = unpacked[0]
+                    ch_data = unpacked[1:9]
+                    has_label = unpacked[9]
+                    label_val = unpacked[10]
+                    
                     timestamps.append(ts / 1000.0)
-                    data[:, i] = channels
+                    data[:, i] = ch_data
+                    if has_label:
+                        labels[i] = label_val
+                
+                has_labels = not np.isnan(labels).all()
                 
                 with open(file_path, mode='w', newline='') as file:
                     writer = csv.writer(file)
-                    print(channel_names)
-                    writer.writerow(["Time"] + channel_names)
+                    
+                    headers = ["Time"] + channel_names
+                    if has_labels:
+                        headers += ["Label"]
+                    writer.writerow(headers)
                     
                     for i in range(len(timestamps)):
                         row = [timestamps[i]] + [data[j][i] for j in range(len(channel_names))]
+                        if has_labels:
+                            label_str = labels[i] if not np.isnan(labels[i]) else ''
+                            row.append(label_str)
                         writer.writerow(row)
             
             elif mode == 'append':
@@ -127,3 +138,20 @@ def load_file(file_path):
     except Exception as e:
         print(f"Error loading file with pyedflib: {e}")
         return None, None, None
+    
+def export_data_from_import(file_path, data, time, channel_names):
+    """Export data to a CSV file after importing from an EDF file."""
+    try:
+        with open(file_path, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(["Time"] + channel_names)
+            
+            for i in range(len(time)):
+                row = [time[i]] + [data[j][i] for j in range(len(channel_names))]
+                writer.writerow(row)
+        
+        print(f"Data successfully exported to {file_path}")
+        return True
+    except Exception as e:
+        print(f"Error exporting data: {e}")
+        return False

@@ -79,13 +79,14 @@ unsigned long currentTime;
 
 void setup() {
   // FIREBEETLE ESP32 Dev
-  ADS.initialize(4,2,5,4,0);        // (DRDY pin, RST pin, CS pin, SCK frequency in MHz, isDaisy bool);
+  // ADS.initialize(4,2,5,4,0);        // (DRDY pin, RST pin, CS pin, SCK frequency in MHz, isDaisy bool);
+  ADS.initialize(16, 2, 5, 4, 0);
   // ESP32 S3 XIAO SEEED
   // ADS.initialize(3,2,44,2,0);
   delay(1000); // Give time for USB to stabilize
   // Serial.setTxTimeoutMs(100);
 
-  Serial.begin(115200); //SERIAL_8E1
+  Serial.begin(115200);
   Serial.println("ADS1299-ESP32"); 
   delay(1000);        
 
@@ -95,17 +96,21 @@ void setup() {
   ADS.getDeviceID();                // Confirm register ID    
   ADS.WREG(CONFIG1,0xD6);           // 0b11010110 - 250 SPS
   ADS.WREG(CONFIG2,0xC2);           // 0b11000010
-  // ADS.RREGS(0x00,0x17);             // read ADS registers starting at 0x00 and ending at 0x17
-  ADS.WREG(CONFIG3,0xEC);           // 0b11101100
+  ADS.WREG(CONFIG3,0xEC);           // 0b11100100
   ADS.RREG(CONFIG3);                // verify write
-  // ADS.WREG(BIAS_SENSP,0xFF);        // bias derivation for each positive channel
+  ADS.WREG(MISC1, 0x20);            // open for SRB1 connection to CHxN - single ended
+  ADS.WREG(BIAS_SENSP,0xFF);        // bias derivation for each positive channel
   // ADS.WREG(BIAS_SENSN,0xFF);        // bias derivation for each negative channel
-  // ADS.WREG(MISC1, 0x20);            // enabling SRB1
+
   for(byte i=CH1SET; i<=CH8SET; i++){   // set up to modify the 8 channel setting registers
-    ADS.regData[i] = 0x60;           // 0b01100100 - temperature sensor?
-  }                                  
+    if (i < CH5SET) {
+      ADS.regData[i] = 0x60;           // 0b01101010
+    } else {
+      ADS.regData[i] = 0xE9;        // 0b11101001 - power down channel
+    }
+  }
   ADS.WREGS(CH1SET,7);               // write new channel settings
-  ADS.RREGS(CH1SET,7);               // read out what we just did to verify the write
+  ADS.RREGS(CH1SET,7);                                 
   ADS.RDATAC();                      // enter Read Data Continuous mode
   
   // Initialize BLE
@@ -167,9 +172,9 @@ void loop() {
     pCharacteristic->setValue((uint8_t*)&dataPacket, sizeof(DataPacket));
     pCharacteristic->notify();
 
-    Serial.println("===============");
-    Serial.print("Timestamp: ");
-    Serial.println(dataPacket.timestamp/1000); // convert to seconds
+    // Serial.println("===============");
+    // Serial.print("Timestamp: ");
+    // Serial.println(dataPacket.timestamp/1000); // convert to seconds
     // Serial.print(" Channel Data: ");
     // Serial.print(dataPacket.channelData[1]);
     // Serial.println();

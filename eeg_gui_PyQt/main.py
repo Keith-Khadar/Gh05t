@@ -2,13 +2,12 @@ import sys
 import os
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, 
-    QStatusBar, QMenu, QAction, QGridLayout, QSplitter
+    QStatusBar, QMenu, QAction, QGridLayout, QSplitter, QShortcut
 )
-from PyQt5.QtCore import QThread, pyqtSignal
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase
+from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent
+from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase, QKeySequence
 import numpy as np
-from utils import PlotManager, EEGWebSocket, load_file, BLEWorker, SignalProcessingWindow, FileHandler
+from utils import PlotManager, EEGWebSocket, load_file, export_data_from_import, BLEWorker, SignalProcessingWindow, FileHandler
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -242,9 +241,26 @@ class MainWindow(QMainWindow):
         self.file_handler = FileHandler()
 
         self.channel_names = ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7", "Ch8"]
-        self.sampling_rate = 0
+        self.sampling_rate = 250
         self.data = np.empty((0, 3))
         self.time = np.empty((0, 1))
+
+        self.shortcut = QShortcut(QKeySequence("L"), self)
+        self.shortcut.activated.connect(self.pressL)
+
+        self.shortcutT = QShortcut(QKeySequence("T"), self)
+        self.shortcutT.activated.connect(self.pressT)
+
+        # signal processing window info
+        self.filter_type = None
+        self.freq_range = []
+        self.model = None
+        self.model_path = None
+        self.labeling_mode = False
+        self.label = 0
+        self.toggle = 0
+        self.apply_model = False
+        self.default_model = 0
 
 # ------------------- HANDLE DATA INPUT TYPE ------------------- #
     def mousePressEvent(self, event):
@@ -346,24 +362,67 @@ class MainWindow(QMainWindow):
         :param ble_data: The incoming data."""
         if data is None:
             return
-    
-        self.data = data
+
+        new_data = np.array(data).reshape((8, 1)) 
+        self.data = new_data
         self.time = timestamp
-
-        new_data = np.array(data).reshape((8, 1))
         timestamp_s = timestamp / 1000.0
+        filtered_data = np.zeros((8, 1))
 
-        self.file_handler.add_data(timestamp, new_data.flatten())
+        if self.ble_reading:
+            adc_max_value = 8388607  # 2^23 - 1 for signed 24-bit
+            marray_volt = (new_data / adc_max_value) * 5  # Convert to volts
+            new_data = marray_volt * 1000  # Convert to millivolts
+        elif self.websocket_reading:
+            adc_max_value = 4095  # 2^12 - 1 for unsigned 12-bit
+            marray_volt = (new_data / adc_max_value) * 5  # Convert to volts
+            new_data = marray_volt * 1000  # Convert to millivolts
+        self.data = new_data
 
-        self.real_time.handle_real_time_data(data, timestamp)
+        # Apply filters
+        if self.filter_type is not None:
+            for channel in range(8):
+                sample = new_data[channel, 0]
+                if self.filter_type in ["Low Pass", "High Pass"]:
+                    cutoff = self.signal_processing_window.freq_range[0]
+                    filtered_sample = self.signal_processing_window.butter_filter(np.array([sample]), fs=self.sampling_rate, cutoff=[cutoff], btype=self.filter_type.lower().replace(" ", ""), rt=1)
+                elif self.filter_type == "Band Pass":
+                    freq_range = self.signal_processing_window.freq_range
+                    filtered_sample = self.signal_processing_window.butter_filter(np.array([sample]), fs=self.sampling_rate, cutoff=freq_range, btype='band', rt=1)
+                elif self.filter_type == "Notch":
+                    notch_freq = self.signal_processing_window.freq_range[0]
+                    filtered_sample = self.signal_processing_window.notch_filter(np.array([sample]), freq=notch_freq, fs=self.sampling_rate, rt=1)
+                else:
+                    filtered_sample = sample
+                filtered_data[channel, 0] = filtered_sample
+            self.data = filtered_data
+
+        if self.apply_model:
+            if self.default_model:
+                spikes, cleaned_data = self.signal_processing_window.detect_emg(self.data)
+                if np.any(spikes):
+                    self.label = 1
+
+        if self.labeling_mode:
+            label = self.label
+            self.file_handler.add_data(timestamp, self.data, label)
+            if self.label == 1:
+                self.label = 0 
+            labeled_data = np.vstack((self.data, np.array([[label]])))
+            self.real_time.labeling_mode = True
+        else:
+            labeled_data = self.data
+            self.file_handler.add_data(timestamp, self.data)
+            self.real_time.labeling_mode = False
+
+        self.real_time.handle_real_time_data(labeled_data, timestamp)
         for plot_type in list(self.active_plots.keys()):
             real_fft, splitter = self.active_plots[plot_type]
-            real_fft.handle_real_time_data(data, timestamp)
+            real_fft.handle_real_time_data(self.data, timestamp)
 
+        # Start animation if needed
         if not self.play_rt_animation and not self.paused_rt:
             print("Starting real-time animation...")
-            self.statusBar().showMessage("Starting Real Time Animation Plot")
-            self.play_button.setText("Stop Data Stream")
             self.play_rt_animation = True
             self.real_time.start_rt_animation()
 
@@ -409,10 +468,10 @@ class MainWindow(QMainWindow):
         file_path, _ = QFileDialog.getSaveFileName(self, "Save File", "", "CSV Files (*.csv)")
         
         if file_path:
-            if self.ble_reading:
+            if self.ble_reading or self.websocket_reading:
                 success = self.file_handler.export_data(file_path, self.channel_names, mode='full')
             else: 
-                success = self.file_handler.export_data(file_path, self.channel_names, mode='full')
+                success = export_data_from_import(file_path, self.data, self.time, self.channel_names)
 
             if success:
                 self.status_bar.showMessage("Export successful!", 3000)
@@ -421,10 +480,59 @@ class MainWindow(QMainWindow):
     
     def open_signal_processing_window(self):
         """Open the signal processing window and connect its signals"""
-        self.signal_processing_window = SignalProcessingWindow(self)
+        self.signal_processing_window = SignalProcessingWindow(self, self.ble_reading or self.websocket_reading)
+        self.signal_processing_window.update_status_signal.connect(self.update_status_bar)
+        self.signal_processing_window.apply_filter_signal.connect(self.apply_filter_to_data)
+        self.signal_processing_window.label_signal.connect(self.toggle_labeling_mode)
+        self.signal_processing_window.apply_model_signal.connect(self.toggle_model)
 
         self.signal_processing_window.exec_()
-                
+
+    def apply_filter_to_data(self, filter_type, freq_range, clear=0):
+        if self.data_loaded and (not self.ble_reading or not self.websocket_reading):
+            if clear == 0:
+                self.signal_processing_window.original_data = self.data
+                if filter_type == "Low Pass":
+                    self.filtered_data = self.signal_processing_window.butter_filter(self.data, self.sampling_rate, [freq_range[0]], btype='low', rt=0)
+                elif filter_type == "High Pass":
+                    self.filtered_data = self.signal_processing_window.butter_filter(self.data, self.sampling_rate, [freq_range[0]], btype='high', rt=0)
+                elif filter_type == "Band Pass":
+                    self.filtered_data = self.signal_processing_window.butter_filter(self.data, self.sampling_rate, freq_range, btype='band', rt=0)
+                elif filter_type == "Notch":
+                    self.filtered_data = self.signal_processing_window.notch_filter(self.data, freq_range[0], self.sampling_rate, rt=0)
+            
+                for plot_mgr, _ in self.active_plots.values():
+                    plot_mgr.data = self.filtered_data
+                self.data = self.filtered_data
+            else:
+                self.data = self.signal_processing_window.original_data
+                for plot_mgr, _ in self.active_plots.values():
+                    plot_mgr.data = self.signal_processing_window.original_data
+                self.signal_processing_window.filtered_data = None
+        else:
+            self.filter_type = filter_type
+
+    def pressL(self):
+        """Detect L presses."""
+        if self.labeling_mode and not self.apply_model:
+            self.label = 1
+
+    def pressT(self):
+        """Detect L presses."""
+        if self.labeling_mode:
+            self.toggle = 1
+
+    def toggle_labeling_mode(self):
+        """Toggle the labeling mode."""
+        self.labeling_mode = not self.labeling_mode
+
+    def toggle_model(self, int):
+        """Apply the model flag"""
+        self.apply_model = not self.apply_model
+        self.default_model = int
+        if not self.labeling_mode:
+            self.labeling_mode = True
+
     def toggle_plot(self, plot_type, checked):
         """Handle plot visibility based on checkbox state"""
         if checked:
@@ -596,6 +704,9 @@ class MainWindow(QMainWindow):
         self.file_handler.stop()
         if os.path.exists(bin_file):
             os.remove(bin_file)
+
+        settings = QSettings("GH05T", "SignalProcessing")
+        settings.clear()
 
         self.close()
         print('Window closed')
