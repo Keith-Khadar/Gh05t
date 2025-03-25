@@ -4788,7 +4788,7 @@
 		)
 		(uuid "5df73ddc-a60c-494e-a9c4-5a9f83c6ea2c")
 	)
-	(label "AGND"
+	(label "SRB1"
 		(at 33.02 143.51 0)
 		(effects
 			(font
@@ -5168,7 +5168,7 @@
 		)
 		(uuid "efd7f9d5-b4a7-4cac-8e45-a82cd81df457")
 	)
-	(label "AGND"
+	(label "SRB2"
 		(at 33.02 146.05 0)
 		(effects
 			(font

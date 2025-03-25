@@ -223,6 +223,8 @@
 	(net 91 "unconnected-(J7-Pin_17-Pad17)")
 	(net 92 "unconnected-(J7-Pin_18-Pad18)")
 	(net 93 "unconnected-(J7-Pin_6-Pad6)")
+	(net 94 "/ADS1299 & Microcontroller/SRB1")
+	(net 95 "/ADS1299 & Microcontroller/SRB2")
 	(footprint "DRL6:DRL6_TEX"
 		(layer "F.Cu")
 		(uuid "05b29118-0494-4041-844a-75066b50df24")
@@ -550,6 +552,17 @@
 			(pintype "bidirectional")
 			(uuid "6e4413e0-769c-47c1-82b5-58bc345b3d4a")
 		)
+		(model "${KICAD8_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-563.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "Capacitor_SMD:C_0805_2012Metric"
 		(layer "F.Cu")
@@ -776,7 +789,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -787,7 +800,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -1180,6 +1193,17 @@
 			(pintype "passive")
 			(solder_mask_margin 0.102)
 			(uuid "b67f80b3-3ae1-4a13-85dc-3efa89f9baba")
+		)
+		(model "${KIPRJMOD}/ProjectLibraries/W3A45C102K4T2A/W3A45C102K4T2A.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 0 0)
+			)
 		)
 	)
 	(footprint "Capacitor_SMD:C_0805_2012Metric"
@@ -2205,6 +2229,17 @@
 			(pintype "bidirectional")
 			(uuid "b774cb65-c602-4452-b418-99098643c639")
 		)
+		(model "${KICAD8_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-563.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "DRL6:DRL6_TEX"
 		(layer "F.Cu")
@@ -2532,6 +2567,17 @@
 			(pinfunction "IO4")
 			(pintype "bidirectional+no_connect")
 			(uuid "36e7fe89-041d-49fe-83b7-06455d9cf78f")
+		)
+		(model "${KICAD8_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-563.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
 		)
 	)
 	(footprint "Capacitor_SMD:C_0805_2012Metric"
@@ -4110,7 +4156,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -4121,7 +4167,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -4515,6 +4561,17 @@
 			(solder_mask_margin 0.102)
 			(uuid "6b762b6f-7e32-48fa-8c83-5b91e5bcc267")
 		)
+		(model "${KIPRJMOD}/ProjectLibraries/W3A45C102K4T2A/W3A45C102K4T2A.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 0 0)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_0805_2012Metric"
 		(layer "F.Cu")
@@ -4741,7 +4798,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -4752,7 +4809,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -5145,6 +5202,17 @@
 			(pintype "passive")
 			(solder_mask_margin 0.102)
 			(uuid "fe6d8b14-4321-4dec-b11d-6cca70999c63")
+		)
+		(model "${KIPRJMOD}/ProjectLibraries/W3A45C102K4T2A/W3A45C102K4T2A.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 0 0)
+			)
 		)
 	)
 	(footprint "Capacitor_SMD:C_0805_2012Metric"
@@ -6067,7 +6135,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -6078,7 +6146,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -6471,6 +6539,17 @@
 			(pintype "passive")
 			(solder_mask_margin 0.102)
 			(uuid "9a317783-effe-4daf-9e9c-e0080e69c518")
+		)
+		(model "${KIPRJMOD}/ProjectLibraries/W3A45C102K4T2A/W3A45C102K4T2A.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 0 0)
+			)
 		)
 	)
 	(footprint "Capacitor_SMD:C_0805_2012Metric"
@@ -6905,7 +6984,7 @@
 		(uuid "d2859c08-0ca1-4f6f-95d8-c2775b049975")
 		(at 119.38 66.04 -90)
 		(property "Reference" "U6"
-			(at 0 0 180)
+			(at 0 0 360)
 			(layer "F.SilkS")
 			(uuid "08f8b722-1d14-4fb6-bd7d-6ddf6150c48f")
 			(effects
@@ -6916,7 +6995,7 @@
 			)
 		)
 		(property "Value" "ADS1299IPAG"
-			(at 20.555 -10.845 -90)
+			(at 20.555 -10.845 90)
 			(layer "F.Fab")
 			(uuid "4a34dab5-5f73-4bf6-b99f-d8b2f4429f77")
 			(effects
@@ -7433,7 +7512,7 @@
 			(size 0.28 1.56)
 			(layers "F.Cu" "F.Paste" "F.Mask")
 			(roundrect_rratio 0.125)
-			(net 2 "AGND")
+			(net 94 "/ADS1299 & Microcontroller/SRB1")
 			(pinfunction "SRB1")
 			(pintype "bidirectional")
 			(solder_mask_margin 0.102)
@@ -7444,7 +7523,7 @@
 			(size 0.28 1.56)
 			(layers "F.Cu" "F.Paste" "F.Mask")
 			(roundrect_rratio 0.125)
-			(net 2 "AGND")
+			(net 95 "/ADS1299 & Microcontroller/SRB2")
 			(pinfunction "SRB2")
 			(pintype "bidirectional")
 			(solder_mask_margin 0.102)
@@ -7950,6 +8029,17 @@
 			(solder_mask_margin 0.102)
 			(uuid "77130569-9cb3-4f11-828c-b69876f8da46")
 		)
+		(model "${KIPRJMOD}/ProjectLibraries/ADS1299/ADS1299IPAG.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 0 0)
+			)
+		)
 	)
 	(footprint "Resistor_SMD:R_Array_Concave_4x0603"
 		(layer "F.Cu")
@@ -8230,7 +8320,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -8241,7 +8331,7 @@
 			(effects
 				(font
 					(size 0.48 0.48)
-					(thickness 0.15)
+					(thickness 0.12)
 				)
 			)
 		)
@@ -8634,6 +8724,17 @@
 			(pintype "passive")
 			(solder_mask_margin 0.102)
 			(uuid "db1d460c-cb43-4048-b2e0-b9c8260deba2")
+		)
+		(model "${KIPRJMOD}/ProjectLibraries/W3A45C102K4T2A/W3A45C102K4T2A.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz -90 0 0)
+			)
 		)
 	)
 	(footprint "Resistor_SMD:R_Array_Concave_4x0603"
@@ -9443,6 +9544,17 @@
 			(pinfunction "IO4")
 			(pintype "bidirectional")
 			(uuid "3150b6ce-a0f4-44ea-bfbd-047bf67196a2")
+		)
+		(model "${KICAD8_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-563.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
 		)
 	)
 	(footprint "Capacitor_SMD:C_0805_2012Metric"
@@ -10890,6 +11002,17 @@
 			(pintype "input")
 			(uuid "93c8efeb-2d74-4774-9678-4d0ba965f521")
 		)
+		(model "${KIPRJMOD}/ProjectLibraries/MCP1640/MCP1640.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
+		)
 	)
 	(footprint "DRL6:DRL6_TEX"
 		(layer "F.Cu")
@@ -11217,6 +11340,17 @@
 			(pinfunction "IO4")
 			(pintype "bidirectional")
 			(uuid "63c84c38-9208-4f0e-a8f7-448a9d7b36aa")
+		)
+		(model "${KICAD8_3DMODEL_DIR}/Package_TO_SOT_SMD.3dshapes/SOT-563.step"
+			(offset
+				(xyz 0 0 0)
+			)
+			(scale
+				(xyz 1 1 1)
+			)
+			(rotate
+				(xyz 0 0 0)
+			)
 		)
 	)
 	(footprint "Connector_PinSocket_2.54mm:PinSocket_1x18_P2.54mm_Vertical"
