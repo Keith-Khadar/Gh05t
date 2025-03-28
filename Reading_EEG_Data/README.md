@@ -74,8 +74,9 @@ Figure:EEG dataset pipeline from data collection to visualization
    A- Connect EEG snap electrodes to the ADS1299 board.
    B- Ensure the ESP32 development board and ESP32-C6 module are powered and configured.
    C- Ensure that all the electrodes are in contact with the scalp.
-   ![image](https://github.com/user-attachments/assets/ed849d00-407b-4b9b-b622-1c76eea5a5d5)
-Figure:EEG Headset and high performance board
+![image](https://github.com/user-attachments/assets/4b2af03a-59c5-4d7e-bbba-4e2725e26962)
+
+Figure:EEG Headset and high performance board (encased in custom case)
 
 3. **Data acquisition**
    A- Open the Arduino Serial Monitor to check real-time EEG data transmission.
