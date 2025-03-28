@@ -11,10 +11,11 @@ Figure:EEG dataset pipeline from data collection to visualization
 1. EEG signals are captured from snap electrodes and processed using an ESP32 development board.
 2. The ESP32 development board transmits the 8-channel EEG data wirelessly via ESPNOW to the ESP32-C6 module.
 3. The ESP32-C6 receives the data and relays it to the Arduino Serial Monitor for verification.
-4. A Python script captures the data from the laptop's serial port and records it in a text file.
+4. A Python script captures the data from the laptop's serial port and records it in a text file. 
 5. The data is formatted for compatibility with the OpenBCI GUI for visualization and further analysis.
-6. Filtering techniques are applied to extract alpha wave frequencies (8-10 Hz), confirming the presence of neural activity.
-7. Initial testing involved verifying ADC readings with a DC voltage input, ensuring data accuracy before integrating electrodes.
+6. Additionally, another python script records the labeled data in csv file for evaluation using the machine learning model.
+7. Filtering techniques are applied to extract alpha wave frequencies (8-10 Hz), confirming the presence of neural activity.
+8. Initial testing involved verifying ADC readings with a DC voltage input, ensuring data accuracy before integrating electrodes.
    ![data collection stages](https://github.com/user-attachments/assets/1ad5dc23-a819-4ac8-99bb-d55ae5c50f29)
 
 
@@ -68,9 +69,13 @@ Figure:EEG dataset pipeline from data collection to visualization
 - Upload **SenderCode.ino** to the ESP32 high-performance board.
 - Upload **ReceiverCode.ino** to the ESP32-C6 module.
 
-### **2. Running the Python Script**
+### **2. Running the Python Script**\
+For visualization:
 - `pip install pyserial`
 - `python3 document_data.py`
+For data labelling:
+- `pip install pynput`
+- `python3 eeg_data_to_file.py`
 
 ## Usage Instructions
 1. **Hardware setup**
@@ -78,7 +83,6 @@ Figure:EEG dataset pipeline from data collection to visualization
    B- Ensure the ESP32 development board and ESP32-C6 module are powered and configured.
    C- Ensure that all the electrodes are in contact with the scalp.
 ![image](https://github.com/user-attachments/assets/4b2af03a-59c5-4d7e-bbba-4e2725e26962)
-
 Figure:EEG Headset and high performance board (encased in custom case)
 
 3. **Data acquisition**
