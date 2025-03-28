@@ -15,6 +15,8 @@ Figure:EEG dataset pipeline from data collection to visualization
 5. The data is formatted for compatibility with the OpenBCI GUI for visualization and further analysis.
 6. Filtering techniques are applied to extract alpha wave frequencies (8-10 Hz), confirming the presence of neural activity.
 7. Initial testing involved verifying ADC readings with a DC voltage input, ensuring data accuracy before integrating electrodes.
+   ![data collection stages](https://github.com/user-attachments/assets/1ad5dc23-a819-4ac8-99bb-d55ae5c50f29)
+
 
 ## Data transmission and performance
 1. The system initially transmitted data at **1 sample per second** to establish a stable connection.
@@ -91,6 +93,8 @@ Figure:Python script writing the data  to a text file
    A- View the recorded data in OpenBCI GUI to visualze the EEG data for all 8 channels.
    ![GUI](https://github.com/user-attachments/assets/e260e019-36f6-4e70-bbdf-fcbd84b48b2d)
 Figure:EEG 8 channel data in the GUI Interface
+![image](https://github.com/user-attachments/assets/bfdb3e86-17a6-45f8-96cd-d8cfb03f0391)
+Figure:EEG 8 channel data recorded in csv file
 
 ## References
 1. [https://www.ti.com/product/ADS1299](https://www.ti.com/product/ADS1299)
