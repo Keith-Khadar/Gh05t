@@ -1,4 +1,4 @@
-# High-Performance Microcontroller Board
+![IMG_20250328_192535507](https://github.com/user-attachments/assets/de79c02c-3f90-47fe-8841-6d34c38dbd5e)# High-Performance Microcontroller Board
 
 ## Overview:
 The High-Performance Microcontroller Board integrates a 24-bit ADC to capture high-resolution EEG signals and transmits the data wirelessly using an ESP32-based development board. 
@@ -17,7 +17,6 @@ Figure:EEG dataset pipeline from data collection to visualization
 7. Filtering techniques are applied to extract alpha wave frequencies (8-10 Hz), confirming the presence of neural activity.
 8. Initial testing involved verifying ADC readings with a DC voltage input, ensuring data accuracy before integrating electrodes.
    ![data collection stages](https://github.com/user-attachments/assets/1ad5dc23-a819-4ac8-99bb-d55ae5c50f29)
-
 
 ## Data transmission and performance
 1. The system initially transmitted data at **1 sample per second** to establish a stable connection.
@@ -61,7 +60,7 @@ Figure:EEG dataset pipeline from data collection to visualization
 - **ESP32 Dev Board with ESP32-S3-WROOM-1 and 24-bit ADC** [https://www.aliexpress.us/item/3256806073268159.html?spm=a2g0o.order_list.order_list_main.20.54681802966XjN&gatewayAdapt=glo2usa](https://www.aliexpress.us/item/3256806073268159.html?spm=a2g0o.order_list.order_list_main.20.54681802966XjN&gatewayAdapt=glo2usa)
 - **ESP32-C6**  
 - **EEG Headset** 
-- **2 USB Cables** (USB-C or Micro-USB)
+- **2 USB Cables** (USB-C)
 
 ## **Setup and execution**
 ### **1. Setting Up the ESP32 & ESP32-C6**
@@ -69,7 +68,7 @@ Figure:EEG dataset pipeline from data collection to visualization
 - Upload **SenderCode.ino** to the ESP32 high-performance board.
 - Upload **ReceiverCode.ino** to the ESP32-C6 module.
 
-### **2. Running the Python Script**\
+### **2. Running the Python Script**
 For visualization:
 - `pip install pyserial`
 - `python3 document_data.py`
@@ -83,22 +82,30 @@ For data labelling:
    B- Ensure the ESP32 development board and ESP32-C6 module are powered and configured.
    C- Ensure that all the electrodes are in contact with the scalp.
 ![image](https://github.com/user-attachments/assets/4b2af03a-59c5-4d7e-bbba-4e2725e26962)
+
 Figure:EEG Headset and high performance board (encased in custom case)
 
 3. **Data acquisition**
    A- Open the Arduino Serial Monitor to check real-time EEG data transmission.
    B- Run the provided Python script to capture data from the serial port.
 ![reciever](https://github.com/user-attachments/assets/a38cc0d9-1d12-4a00-a44a-9e0ed74b7f91)
+
 Figure:Receiver code run on XIAO-ESP32-C6 board to obtain 8-channel data via WiFi visible in the serial monitor
 ![python_script](https://github.com/user-attachments/assets/b7d3d6ac-e961-4d5c-bfa1-aba720ed82bc)
+
 Figure:Python script writing the data  to a text file
 
 5. **Visualization and analysis**
    A- View the recorded data in OpenBCI GUI to visualze the EEG data for all 8 channels.
-   ![GUI](https://github.com/user-attachments/assets/e260e019-36f6-4e70-bbdf-fcbd84b48b2d)
+![GUI](https://github.com/user-attachments/assets/e260e019-36f6-4e70-bbdf-fcbd84b48b2d)
+   
 Figure:EEG 8 channel data in the GUI Interface
 ![image](https://github.com/user-attachments/assets/bfdb3e86-17a6-45f8-96cd-d8cfb03f0391)
+
 Figure:EEG 8 channel data recorded in csv file
+
+## Protective case design overview
+![image](https://github.com/user-attachments/assets/9cd528c7-44c5-493f-83ec-1138f3c89896)
 
 ## References
 1. [https://www.ti.com/product/ADS1299](https://www.ti.com/product/ADS1299)
