@@ -1,4 +1,4 @@
-# EEG Data Collection Using ESP32 and Serial Communication
+# EEG data collection and labelling
 
 ## Overview
 This project captures the 8 channel EEG data, processes the received hex values into decimal format, and logs them into a CSV file. The script also records whether the user's eyes are closed based on keyboard input (tab key).
