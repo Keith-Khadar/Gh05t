@@ -43,7 +43,7 @@ The script creates a CSV file (`received_data.csv`) with the following columns:
 - EEG data from 8 electrodes (Fp1, Fp2, C3, C4, P7, P8, O1, O2)
 - Timestamp
 - Eyes closed (1 if `Tab` is pressed, 0 otherwise)
-- 
+
 ![image](https://github.com/user-attachments/assets/4a46b578-f61c-4438-a378-ca1189c3cf49)
 Figure: Sample CSV file
 
