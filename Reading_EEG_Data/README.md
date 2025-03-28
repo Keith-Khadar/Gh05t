@@ -1,4 +1,4 @@
-![IMG_20250328_192535507](https://github.com/user-attachments/assets/de79c02c-3f90-47fe-8841-6d34c38dbd5e)# High-Performance Microcontroller Board
+# High-Performance Microcontroller Board
 
 ## Overview:
 The High-Performance Microcontroller Board integrates a 24-bit ADC to capture high-resolution EEG signals and transmits the data wirelessly using an ESP32-based development board. 
