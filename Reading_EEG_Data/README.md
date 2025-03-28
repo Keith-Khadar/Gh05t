@@ -38,6 +38,10 @@ Figure:EEG dataset pipeline from data collection to visualization
 3. **SenderCode/SenderCode.h**: Header file containing function prototypes and constants used by SenderCode.cpp and SenderCode.ino.
 4. **SenderCode/SenderCode.cpp**: This file implements core functions for acquiring EEG signals and transmitting them via ESPNOW.
 5. **SenderCode/SenderCode.ino**: The main Arduino sketch for the ESP32 (EEG signal acquisition & transmission).
+6. **Recorded_Data/eeg_data_to_file.py:** The python script for collecting and labelling blinking EEG data (10 seconds).
+7. **Recorded_Data/labeled_data folder** This folder has 10 csv files of labelled EEG data.
+8. **Recorded_Data/unlabeled_data folder** This folder has 10 csv files of unlabelled EEG data.
+9. **High_performance_board_protective_case/high_performance_board_protective_case.stl** The 3D model of a custom-designed protective case meant to safeguard a high-performance board from physical damage, environmental factors, and overheating.
 
 ## **Installation & Setup**
 
@@ -47,6 +51,7 @@ Figure:EEG dataset pipeline from data collection to visualization
 - **Python (3.8+)**
 - **PySerial Library** (`pip install pyserial`)
 - **OpenBCI GUI**
+- **pynput Library** (`pip install pynput`)
 
 ### **2. Hardware Requirements**
 - **ESP32 Dev Board with ESP32-S3-WROOM-1 and 24-bit ADC** [https://www.aliexpress.us/item/3256806073268159.html?spm=a2g0o.order_list.order_list_main.20.54681802966XjN&gatewayAdapt=glo2usa](https://www.aliexpress.us/item/3256806073268159.html?spm=a2g0o.order_list.order_list_main.20.54681802966XjN&gatewayAdapt=glo2usa)
