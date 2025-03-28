@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from bleak import BleakClient, BleakScanner
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 import logging
@@ -48,8 +49,11 @@ class EEGBLE(QThread):
         try:
             bleak_logger.info(f"Connecting to device ({esp32_address})...")
             self.update_status.emit(f"Connecting to device...")
-            self.client = BleakClient(esp32_address, disconnected_callback=self.disconnect)
-
+            self.client = BleakClient(esp32_address, disconnected_callback=self.disconnect, 
+                                       winrt=dict(
+                                            use_cached_services=False,
+                                            scanning_mode="active"
+                                        ))
             await self.client.connect()
             if not self.client.is_connected:
                 self.update_status.emit("Failed to connect to device.")
@@ -74,7 +78,7 @@ class EEGBLE(QThread):
 
     async def disconnect_client(self):
         """Disconnects the BLE client and stops notifications."""
-        if self.client and self.client.is_connected:
+        if self.client:
             try:
                 await self.client.stop_notify(CHARACTERISTIC_UUID)
                 await self.client.disconnect()
@@ -136,6 +140,7 @@ class BLEWorker(QThread):
             if len(raw_data) == 36:
                 timestamp = struct.unpack('<I', raw_data[:4])[0]
                 channel_data = list(struct.unpack('<8i', raw_data[4:36]))
+                # print(channel_data)
                 return timestamp, channel_data
             else:
                 print(f"Unexpected data length: {len(raw_data)} bytes")

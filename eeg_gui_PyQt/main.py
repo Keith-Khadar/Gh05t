@@ -4,10 +4,14 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, 
     QStatusBar, QMenu, QAction, QGridLayout, QSplitter, QShortcut
 )
-from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent
+from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent, QCoreApplication
 from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase, QKeySequence
 import numpy as np
-from utils import PlotManager, EEGWebSocket, load_file, export_data_from_import, BLEWorker, SignalProcessingWindow, FileHandler
+import websockets
+import asyncio
+import json
+from threading import Thread
+from utils import PlotManager, EEGWebSocket, WebSocketServer, load_file, export_data_from_import, BLEWorker, SignalProcessingWindow, FileHandler
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -142,7 +146,7 @@ class MainWindow(QMainWindow):
         self.add_plot_menu = QMenu(self)
         self.add_plot_menu.setCursor(Qt.PointingHandCursor)
 
-        plot_types = ["Time Series", "Polar FFT", "FFT"]
+        plot_types = ["Time Series", "Polar FFT", "FFT", "Head Topography"]
         for plot_type in plot_types:
             action = QAction(plot_type, self)
             action.setCheckable(True)
@@ -241,6 +245,8 @@ class MainWindow(QMainWindow):
         self.file_handler = FileHandler()
 
         self.channel_names = ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7", "Ch8"]
+        self.electrode_placements = ["Fp1", "Fp2", "O1", "O2", "T7", "T8", "T5", "T6"]
+
         self.sampling_rate = 250
         self.data = np.empty((0, 3))
         self.time = np.empty((0, 1))
@@ -261,6 +267,10 @@ class MainWindow(QMainWindow):
         self.toggle = 0
         self.apply_model = False
         self.default_model = 0
+        self.labeled_data = False
+
+        # websocket api for labels
+        self.ws_server = WebSocketServer(4242)
 
 # ------------------- HANDLE DATA INPUT TYPE ------------------- #
     def mousePressEvent(self, event):
@@ -406,10 +416,18 @@ class MainWindow(QMainWindow):
         if self.labeling_mode:
             label = self.label
             self.file_handler.add_data(timestamp, self.data, label)
-            if self.label == 1:
+            if self.label == 1 and not self.toggle:
                 self.label = 0 
+            else: 
+                self.label = self.toggle
             labeled_data = np.vstack((self.data, np.array([[label]])))
             self.real_time.labeling_mode = True
+
+            # send labels
+            ws_data = {
+                "label": int(self.label) if hasattr(self, 'label') else 0,
+            }
+            self.ws_server.send_data(ws_data)
         else:
             labeled_data = self.data
             self.file_handler.add_data(timestamp, self.data)
@@ -422,7 +440,7 @@ class MainWindow(QMainWindow):
 
         # Start animation if needed
         if not self.play_rt_animation and not self.paused_rt:
-            print("Starting real-time animation...")
+            self.statusBar().showMessage("Starting real-time animation")
             self.play_rt_animation = True
             self.real_time.start_rt_animation()
 
@@ -441,6 +459,8 @@ class MainWindow(QMainWindow):
                     plot_mgr.play_fft(self.data)
                 elif plot_mgr.plot_type == "FFT":
                     plot_mgr.play_fft(self.data)
+                elif plot_mgr.plot_type == "Head Topography":
+                    plot_mgr.play_topography(self.data, self.time)
             self.play_button.setText("Stop Data Stream")
             self.play_animation = True
         elif self.play_animation and self.data_loaded:
@@ -453,12 +473,17 @@ class MainWindow(QMainWindow):
             self.statusBar().showMessage("Stopping real-time data stream...")
             self.play_button.setText("Start Data Stream")
             self.real_time.stop_animation()
+            for plot_mgr, _ in self.active_plots.values():
+                    plot_mgr.stop_animation()
             self.play_rt_animation = False
             self.paused_rt = True
         elif self.paused_rt and self.ble_reading:
             self.statusBar().showMessage("Resuming real-time data stream...")
             self.play_button.setText("Stop Data Stream")
             self.real_time.start_rt_animation()
+            for plot_mgr, _ in self.active_plots.values():
+                    plot_mgr.start_fft_animation()
+                    plot_mgr.start_topo_animation()
             self.paused_rt = False
         else:
             self.statusBar().showMessage("No data loaded!")
@@ -509,6 +534,7 @@ class MainWindow(QMainWindow):
                 for plot_mgr, _ in self.active_plots.values():
                     plot_mgr.data = self.signal_processing_window.original_data
                 self.signal_processing_window.filtered_data = None
+                self.filter_type = filter_type
         else:
             self.filter_type = filter_type
 
@@ -520,7 +546,7 @@ class MainWindow(QMainWindow):
     def pressT(self):
         """Detect L presses."""
         if self.labeling_mode:
-            self.toggle = 1
+            self.toggle = not self.toggle
 
     def toggle_labeling_mode(self):
         """Toggle the labeling mode."""
@@ -532,6 +558,34 @@ class MainWindow(QMainWindow):
         self.default_model = int
         if not self.labeling_mode:
             self.labeling_mode = True
+
+        # if not (self.ble_reading or self.websocket_reading):
+        #     if self.default_model:
+        #         if not hasattr(self, 'label_buffer') or len(self.label_buffer) != self.data.shape[1]:
+        #             self.label_buffer = np.zeros(self.data.shape[1], dtype=np.int32)
+
+        #         for channel_idx in range(self.data.shape[0]):
+        #             channel_data = self.data[channel_idx, :]
+        #             spikes, cleaned_data = self.signal_processing_window.detect_emg(channel_data)
+        #             self.data[channel_idx, :] = cleaned_data
+                    
+        #             if spikes is not None and len(spikes) > 0:
+        #                 if len(spikes) != len(self.label_buffer):
+        #                     spikes = np.resize(spikes, len(self.label_buffer))
+        #                 self.label_buffer = (self.label_buffer | spikes.astype(np.int32))
+                
+        #         labeled_data = (self.data, self.label_buffer)
+        #     else:
+        #         self.data = self.original_data.copy()
+        #         self.label_buffer = np.zeros(self.data.shape[1], dtype=np.int32)
+        #         labeled_data = (self.data, self.label_buffer)
+
+        #     for plot_mgr, _ in self.active_plots.values():
+        #         plot_mgr.data = labeled_data[0]
+        #         plot_mgr.label_buffer = labeled_data[1]
+        #         plot_mgr.labeling_model = self.labeling_mode
+            
+        #     self.labeled_data = self.default_model
 
     def toggle_plot(self, plot_type, checked):
         """Handle plot visibility based on checkbox state"""
@@ -551,7 +605,7 @@ class MainWindow(QMainWindow):
         if plot_type == "Time Series":
             plot_mgr.plot_data(self.data, self.time, self.channel_names, 
                               self.sampling_rate, plot_type)
-        elif plot_type in ["Polar FFT", "FFT"]:
+        elif plot_type in ["Polar FFT", "FFT", "Head Topography"]:
             if self.ble_reading:
                 plot_mgr.real_fft = self.real_fft
                 plot_mgr.ble_reading = True
@@ -559,6 +613,7 @@ class MainWindow(QMainWindow):
                 plot_mgr.plot_type = plot_type
                 plot_mgr.plot_data(self.data, self.time, self.channel_names, self.sampling_rate, plot_type)
             else:
+                plot_mgr.electrode_placements = self.channel_names
                 plot_mgr.plot_data(self.data, self.time, self.channel_names, self.sampling_rate, plot_type)
         
         splitter = self.find_or_create_splitter()
@@ -708,7 +763,8 @@ class MainWindow(QMainWindow):
         settings = QSettings("GH05T", "SignalProcessing")
         settings.clear()
 
-        self.close()
+        super().close()
+        QCoreApplication.instance().quit()
         print('Window closed')
 
 if __name__ == "__main__":

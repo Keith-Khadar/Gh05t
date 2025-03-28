@@ -4,6 +4,8 @@ from PyQt5.QtWidgets import QSizePolicy
 import pyfftw
 import numpy as np
 import time
+import mne
+from mne.channels import make_dig_montage
 from matplotlib.collections import LineCollection
 import matplotlib.animation as animation
 
@@ -26,12 +28,17 @@ class PlotManager:
         self.time = 0.0
         self.time_buffer = np.empty((0,))
         self.last_update_time = time.time()
+
         self.channel_names = ["Ch1", "Ch2", "Ch3", "Ch4", "Ch5", "Ch6", "Ch7", "Ch8"]
+        self.electrode_placements = ["Fp1", "Fp2", "O1", "O2", "F7", "F8", "T5", "T6"]
+
         self.current_index = 0
 
         self.animt = None
         self.animf = None
         self.animf_show = False
+        self.anim_topography = None
+        self.topo = False
         self.offset = 0
         self.dt = 0
         self.n_plot = 2000  # max data in data buffer
@@ -443,6 +450,141 @@ class PlotManager:
 
         self.canvas.draw()
 
+    def initialize_topography(self, channel_names):
+        """Initialize topography settings based on actual channel names"""
+        clean_names = [name.replace('EEG ', '') for name in channel_names]
+        
+        available_electrodes = []
+        available_indices = []
+        standard_electrodes = ["Fp1", "Fp2", "O1", "O2", "F7", "F8", "T5", "T6", "T3", "T4", "F3", "F4", "P3", "P4", "Pz", "Fz", "Cz", "C3", "C4", "A1", "A2"]
+        
+        for i, name in enumerate(clean_names):
+            if name in standard_electrodes:
+                available_electrodes.append(name)
+                available_indices.append(i)
+    
+        if not available_electrodes:
+            print("Warning: No standard electrodes found for topography")
+            return False
+        
+        self.info = mne.create_info(
+            ch_names=available_electrodes,
+            sfreq=self.sampling_rate,
+            ch_types='eeg'
+        )
+        
+        montage = mne.channels.make_standard_montage('standard_1020')
+        
+        self.info.set_montage(montage)
+        
+        self.topography_channels = {
+            'indices': available_indices,
+            'names': available_electrodes
+        }
+        
+        return True
+    
+    def plot_topography(self, data, time):
+        """Plot scalp topography using available channels"""
+        if not hasattr(self, 'topography_channels'):
+            print("Topography not initialized - call initialize_topography() first")
+            return
+        
+        if data.size == 0 or data.shape[0] == 0:
+            return
+
+        self.ax.clear()
+        
+        if len(data.shape) != 2:
+            print(f"Data must be 2D array, got shape {data.shape}")
+            return
+        
+        if data.shape[0] > data.shape[1]:
+            data = data.T
+        
+        try:
+            # Verify channel indices are valid
+            valid_indices = [i for i in self.topography_channels['indices'] if i < data.shape[0]]
+            if not valid_indices:
+                print(f"No valid channel indices in {self.topography_channels['indices']} for data shape {data.shape}")
+                return
+                
+            data_subset = data[valid_indices, :]
+        except IndexError as e:
+            print(f"Channel index error: {e}")
+            print(f"Data has {data.shape[0]} channels, trying to access {self.topography_channels['indices']}")
+            return
+        
+        window_size = int(self.sampling_rate)
+        
+        if self.ble_reading or self.web_socket:
+            # For real-time data, use most recent samples
+            if data_subset.shape[1] == 0:
+                print("No data available in real-time buffer")
+                return
+                
+            window_start = max(0, data_subset.shape[1] - window_size)
+            data_window = data_subset[:, window_start:]
+        else:
+            if self.vertical_line is not None and time is not None:
+                current_time = self.vertical_line.get_xdata()[0]
+                time_idx = np.argmin(np.abs(time - current_time))
+                window_start = max(0, time_idx - window_size//2)
+                window_end = min(data_subset.shape[1], time_idx + window_size//2)
+                data_window = data_subset[:, window_start:window_end]
+            else:
+                data_window = data_subset[:, :min(window_size, data_subset.shape[1])]
+        
+        if data_window.size == 0:
+            print("No data in selected window")
+            return
+        
+        data_avg = np.mean(data_window, axis=1)
+        
+        try:
+            if not hasattr(self, 'cbar'):
+                im, _ = mne.viz.plot_topomap(
+                    data_avg,
+                    self.info,
+                    axes=self.ax,
+                    show=False,
+                    contours=6,
+                    res=64,
+                    extrapolate='head',
+                    sphere=(0, 0, 0, 0.095),
+                    outlines='head'
+                )
+                self.cbar = self.figure.colorbar(im, ax=self.ax)
+                self.cbar.set_label('µV')
+                self.cbar_initialized = True
+            else:
+                mne.viz.plot_topomap(
+                    data_avg,
+                    self.info,
+                    axes=self.ax,
+                    show=False,
+                    contours=6,
+                    res=64,
+                    extrapolate='head',
+                    sphere=(0, 0, 0, 0.095),
+                    outlines='head'
+                )
+            
+            for collection in self.ax.collections:
+                if hasattr(collection, '_sizes'):
+                    collection._sizes = [10]
+                    collection.set_color('k')
+                    collection.set_linewidth(1)
+            
+            title = 'Real-Time Topography' if (self.ble_reading or self.web_socket) else 'Scalp Topography'
+            self.ax.set_title(title)
+            
+            self.canvas.draw()
+        except Exception as e:
+            print(f"Topography plotting failed: {str(e)}")
+            import traceback
+            traceback.print_exc()
+
     def plot_data(self, data, time, channel_names=None, sampling_rate=0, plot_type="Time Series"):
         """Plot data based on the plot type.
         
@@ -458,6 +600,7 @@ class PlotManager:
         if not self.ble_reading:
             self.time = time
             self.channel_names = channel_names
+            self.electrode_placements = channel_names
 
         if plot_type == "Time Series":
             if data.shape[0] > data.shape[1]:
@@ -480,6 +623,15 @@ class PlotManager:
             self.animf_show = True
         elif plot_type == "Real Time Time Plot":
             self.real_time_stackplot(data,seconds=time[-1], ylabels=self.channel_names)
+        elif plot_type == "Head Topography":
+            if self.ble_reading or self.web_socket:
+                self.initialize_topography(self.electrode_placements)
+                self.plot_topography(self.data_rt, self.time_buffer)
+                self.start_topo_animation()
+            else:
+                self.initialize_topography(channel_names)
+                self.plot_topography(data, time)
+            self.topo = True
         self.canvas.draw()
 
     def setup_fft_plot(self, polar=False):
@@ -577,6 +729,40 @@ class PlotManager:
 
         self.canvas.draw()
 
+    def animate_topography(self, frame):
+        """Update the topography plot for each animation frame"""
+        try:
+            if not hasattr(self, 'data') or self.data.size == 0:
+                return
+            
+            if not hasattr(self, 'animate_topography_frames'):
+                return
+                
+            window_size = getattr(self, 'topography_window_size', int(self.sampling_rate))
+            
+            progress = min(frame / self.animate_topography_frames, 1.0)
+            pos = int(progress * (self.data.shape[1] - window_size))
+            window_start = pos
+            window_end = min(pos + window_size, self.data.shape[1])
+            
+            time_window = None
+            if hasattr(self, 'time_data') and isinstance(self.time_data, (np.ndarray, list)):
+                if len(self.time_data) == self.data.shape[1]:
+                    time_window = self.time_data[window_start:window_end]
+            
+            self.plot_topography(self.data[:, window_start:window_end], time_window)
+            
+            if hasattr(self, 'vertical_line') and self.vertical_line is not None:
+                if time_window is not None and len(time_window) > 0:
+                    center_time = (time_window[0] + time_window[-1]) / 2
+                else:
+                    center_time = (window_start + window_size/2)/self.sampling_rate
+                self.vertical_line.set_xdata([center_time, center_time])
+            
+            self.canvas.draw_idle()
+        except Exception as e:
+            print(f"Error in topography animation frame {frame}: {str(e)}")
+
     def play_time(self, data, channel_names, interval=5):
         """Start the animation with looping enabled.
         
@@ -614,6 +800,45 @@ class PlotManager:
         )
         self.canvas.draw()
 
+    def play_topography(self, data, interval=5):
+        """Start the topography animation with proper time handling"""
+        if not isinstance(data, np.ndarray) or data.size == 0:
+            print("Error: Invalid data input for topography animation")
+            return
+
+        self.data = data
+        
+        window_size = int(self.sampling_rate)
+        if data.shape[1] <= window_size:
+            print("Error: Not enough data points for animation")
+            return
+
+        total_frames = data.shape[1] - window_size
+        step_size = max(1, int(total_frames / 100))
+        
+        self.animate_topography_frames = total_frames
+        self.topography_window_size = window_size
+
+        try:
+            interval = int(interval) if isinstance(interval, (int, float)) else 50
+            interval = max(interval, 10)
+        except (TypeError, ValueError):
+            interval = 50
+
+        try:
+            self.anim_topography = animation.FuncAnimation(
+                self.figure,
+                self.animate_topography,
+                frames=range(0, total_frames, step_size),
+                interval=interval,
+                repeat=True,
+                blit=False,
+                cache_frame_data=False
+            )
+            self.canvas.draw()
+        except Exception as e:
+            print(f"Error creating topography animation: {str(e)}")
+
     def stop_animation(self):
         """Stop the animation."""
         if self.animt is not None:
@@ -623,6 +848,10 @@ class PlotManager:
         if self.animf is not None and self.animf_show:
             self.animf.event_source.stop()
             self.animf = None
+
+        if self.anim_topography is not None and self.topo:
+            self.anim_topography.event_source.stop()
+            self.anim_topography = None
 
     def start_rt_animation(self):
         """Start the real-time animation for the fft and time series plots"""
@@ -642,6 +871,16 @@ class PlotManager:
                 self.real_fft_animate, 
                 interval=1,
                 blit=True,
+                cache_frame_data=False
+            )
+
+    def start_topo_animation(self):
+        if self.anim_topography is None:
+            self.anim_topography = animation.FuncAnimation(
+                self.figure, 
+                self.real_topo_animate, 
+                interval=1,
+                blit=False,
                 cache_frame_data=False
             )
 
@@ -668,7 +907,6 @@ class PlotManager:
                 ylabels=[f'Ch{i+1}' for i in range(self.data_rt.shape[0])],  
                 ax=self.ax  
             )
-
         return self.ax.collections
     
     def real_fft_animate(self, frame):
@@ -686,12 +924,21 @@ class PlotManager:
             if not hasattr(self, 'fft_ax'):
                 self.setup_fft_plot(polar=True)
             self.real_time_fft(fft_data, sampling_rate=250, polar=True, ax=self.fft_ax)
-        else: # Regular FFT
+        else:
             if not hasattr(self, 'fft_ax'):
                 self.setup_fft_plot(polar=False)
             self.real_time_fft(fft_data, sampling_rate=250, polar=False, ax=self.fft_ax)
 
         return self.fft_ax.lines + self.fft_ax.collections
+    
+    def real_topo_animate(self, frame):
+        """Update the plot for each frame of the animation."""
+        if self.data_rt.size == 0:
+            return []
+        
+        self.plot_topography(self.data_rt, self.time_buffer)
+
+        return self.ax.collections
     
     def handle_real_time_data(self, new_data, timestamp):
         """Handle incoming real-time data and update the data buffers.

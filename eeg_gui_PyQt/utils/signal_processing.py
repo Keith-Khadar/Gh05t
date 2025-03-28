@@ -41,14 +41,14 @@ class SignalProcessingWindow(QDialog):
         filter_row_layout.addWidget(self.freq_label)
 
         self.freq_min_input = QComboBox()
-        self.freq_min_input.addItems([str(i) for i in range(0, 101, 5)])  
+        self.freq_min_input.addItems([str(i) for i in range(5, 101, 5)])  
         self.freq_min_input.setFixedWidth(60)
         self.freq_min_input.setCursor(Qt.PointingHandCursor)
         self.freq_min_input.setStyleSheet("background-color: #3498DB; selection-background-color: #2e88c5; selection-color: white; color: white;")
         filter_row_layout.addWidget(self.freq_min_input)
 
         self.freq_max_input = QComboBox()
-        self.freq_max_input.addItems([str(i) for i in range(0, 101, 5)])
+        self.freq_max_input.addItems([str(i) for i in range(5, 101, 5)])
         self.freq_max_input.setCursor(Qt.PointingHandCursor)  
         self.freq_max_input.setFixedWidth(60)
         self.freq_max_input.setStyleSheet("background-color: #3498DB; selection-background-color: #2e88c5; selection-color: white; color: white;")
@@ -118,6 +118,11 @@ class SignalProcessingWindow(QDialog):
         self.no_model_label.setVisible(False)
         model_layout.addWidget(self.no_model_label)
 
+        self.no_model_filein_label = QLabel("When using file input, cannot use a ML model.")
+        self.no_model_filein_label.setAlignment(Qt.AlignHCenter)
+        self.no_model_filein_label.setVisible(False)
+        model_layout.addWidget(self.no_model_filein_label)
+
         model_layout.addLayout(model_row_layout)
         model_group.setLayout(model_layout)
         layout.addWidget(model_group)
@@ -136,7 +141,7 @@ class SignalProcessingWindow(QDialog):
         self.status_label.setAlignment(Qt.AlignHCenter)
         labeling_layout.addWidget(self.status_label)
 
-        self.label_instruc = QLabel("Press L to label with 1")
+        self.label_instruc = QLabel("Press L to label with 1. Press T to toggle 1.")
         self.label_instruc.setAlignment(Qt.AlignHCenter)
         labeling_layout.addWidget(self.label_instruc)
         self.label_instruc.setVisible(False)
@@ -166,12 +171,19 @@ class SignalProcessingWindow(QDialog):
         self.eff_dc = [0.0] * 8
         self.delta = [self.delta_init] * 8
 
+        # lms weight history
+        self.w_lms_k = []
+
+        self.load_settings()
+
         self.rt = rt
         if self.rt == False:
             self.labeling_mode_checkbox.setVisible(False)
-            self.status_label.setText("Cannot enable labeling in import file mode")
-
-        self.load_settings()
+            self.no_model_filein_label.setVisible(True)
+            self.apply_ml_button.setVisible(False)
+            self.import_model_button.setVisible(False)
+            self.use_default_model_checkbox.setVisible(False)
+            self.status_label.setText("Cannot enable labeling or import model in file input mode")
 
     def apply_filter(self):
         """Apply the selected filter to the data."""
@@ -213,9 +225,13 @@ class SignalProcessingWindow(QDialog):
     def butter_filter(self, data, fs, cutoff, btype, order=5, rt=0):
         """Create a Butterworth filter and apply it to the data."""
         nyquist = 0.5 * fs
-        normal_cutoff = [c / nyquist for c in cutoff]
+        if btype == "band":
+            normal_cutoff = [c / nyquist for c in cutoff]
+        else:
+            normal_cutoff = cutoff[0] / nyquist
         if rt == 0:
-            if btype == "Band Pass":
+            if btype == "band":
+                normal_cutoff = [c / nyquist for c in cutoff]
                 sos = butter(order, normal_cutoff, btype=btype, output='sos')
                 y = sosfiltfilt(sos, data)
             else:
@@ -342,12 +358,15 @@ class SignalProcessingWindow(QDialog):
 
         self.filter_type = settings.value("filter_type", "None")
         self.filter_type_combo.setCurrentText(self.filter_type)
+        if self.filter_type != "None":
+            self.clear_filter_button.setVisible(True)
+            self.apply_filter_button.setVisible(False)
 
         min_freq = settings.value("freq_min", "0")
         self.freq_min_input.setCurrentText(min_freq)
         max_freq = settings.value("freq_max", "0")
         self.freq_max_input.setCurrentText(max_freq)
-        self.filter_type = [min_freq, max_freq]
+        self.freq_range = [int(min_freq), int(max_freq)]
 
         self.model = settings.value("model", "None")
         if self.model != "None":
@@ -383,6 +402,7 @@ class SignalProcessingWindow(QDialog):
         settings.setValue("filter_type", self.filter_type_combo.currentText())
         settings.setValue("freq_min", self.freq_min_input.currentText())
         settings.setValue("freq_max", self.freq_max_input.currentText())
+        settings.setValue("freq_range", self.freq_range)
         settings.setValue("model", self.model)
         settings.setValue("model_path", self.model_path)
         settings.setValue("labeling_mode", str(self.labeling_mode_checkbox.isChecked()))
@@ -392,7 +412,7 @@ class SignalProcessingWindow(QDialog):
         settings.setValue("butter_states", self.butter_states)
         settings.setValue("notch_states", self.notch_states)
 
-    # model
+    # model for emg
     def detect_emg(self, raw_data):
         """
         Process one sample of 8-channel data through EMG detection pipeline.

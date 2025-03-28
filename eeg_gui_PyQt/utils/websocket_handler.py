@@ -3,9 +3,11 @@ import time
 import asyncio
 import json
 import numpy as np
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, QObject, pyqtSignal
+from threading import Thread
 import struct
 import logging
+import websockets
 
 HOST = "224.1.1.1"  # Replace with your Pico's IP address
 PORT = 5005
@@ -15,6 +17,7 @@ SAMPLES_PER_PACKET = 8
 logging.basicConfig(level=logging.INFO)
 web_logger = logging.getLogger(__name__)
 
+# HANDLE INCOMING EEG DATA FROM RPI PICO DEVICE
 class EEGWebSocket(QThread):
     status_update_signal = pyqtSignal(str)
     data_received = pyqtSignal(int, list)
@@ -136,3 +139,71 @@ class EEGWebSocket(QThread):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         loop.run_until_complete(self.connect())
+
+
+# API TO HANDLE SENDING LABELED INFORMATION
+class WebSocketServer(QObject):
+    def __init__(self, port=4242):
+        super().__init__()
+        self.port = port
+        self.clients = set()
+        self.server = None
+        self.loop = None
+        self.thread = None
+        self.start_server()
+
+    def start_server(self):
+        """Start WebSocket server in a dedicated thread"""
+        def run_server():
+            self.loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(self.loop)
+
+            async def server_main():
+                async with websockets.serve(
+                    self.handle_connection,
+                    "0.0.0.0",
+                    self.port
+                ):
+                    await asyncio.Future()
+
+            self.loop.run_until_complete(server_main())
+
+        self.thread = Thread(target=run_server, daemon=True)
+        self.thread.start()
+
+    async def handle_connection(self, websocket, path):
+        """Handle new WebSocket connections"""
+        self.clients.add(websocket)
+        try:
+            async for message in websocket:
+                pass
+        finally:
+            self.clients.remove(websocket)
+
+    def send_data(self, data):
+        """Thread-safe data broadcasting"""
+        if not self.clients:
+            return
+
+        async def send_all():
+            message = json.dumps(data)
+            await asyncio.wait([client.send(message) for client in self.clients])
+
+        asyncio.run_coroutine_threadsafe(send_all(), self.loop)
+
+    def stop_server(self):
+        """Cleanly shutdown the WebSocket server"""
+        if self.loop and self.loop.is_running():
+            # Cancel all tasks before stopping the loop
+            tasks = [task for task in asyncio.all_tasks(self.loop) if not task.done()]
+            for task in tasks:
+                task.cancel()
+                try:
+                    self.loop.run_until_complete(task)
+                except asyncio.CancelledError:
+                    pass
+            
+            self.loop.call_soon_threadsafe(self.loop.stop)  # Stop the event loop safely
+
+        if self.thread and self.thread.is_alive():
+            self.thread.join()  # Ensure the server thread is fully closed
