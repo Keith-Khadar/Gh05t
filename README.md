@@ -53,9 +53,8 @@ We provide various levels to users depending on cost, precision, and usability:
   - A python script is employed to label and timestamp the 8-channel EEG blinking data. This script facilitates the real-time processing and organization of the data, ensuring that each blink event is accurately marked with its corresponding timestamp for subsequent analysis.
   <p align="center">
   <img src="https://github.com/user-attachments/assets/1e4aa29c-b1bf-421d-8bab-5dd617b7926b" alt="data collection stages" width="500" />
+  <img src="https://github.com/user-attachments/assets/d988fad5-ef7a-4597-9178-4c8908839831" alt="fft plot" width="500" />
   </p>
-   
-**OpenBCI GUI**.
 
 ### <p align="center">**Balanced Performance Board**[^2]</p>
 | <div style="width:600px">Hardware Architecture & Wiring</div> | Components | Communication Protocols |
