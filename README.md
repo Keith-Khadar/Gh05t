@@ -8,8 +8,7 @@ We provide various levels to users depending on cost, precision, and usability:
 
 | Feature             | High Performance Development Board[^1] | Balanced Performance Board[^2] | Low Cost EEG Filtering Circuit[^3] |
 |---------------------|---------|---------|---------|
-| **Price**          | ~$450    | ~$100    | ~$50    |
-| **Number of Channels** | 8/16   | 8*   | 8   |
+| **Number of Channels** | 8*   | 8*   | 8   |
 | **Resolution**      | 24-bit  | 24-bit  | 12-bit  |
 | **Lowest Sampling Rate**   | 250 Hz  | 250 Hz  | 500 Hz  |
 | **ADC Chip**        | ADS1299-IPAG | ADS1299-IPAG | Internal RPi Pico ADC |
@@ -18,9 +17,10 @@ We provide various levels to users depending on cost, precision, and usability:
 | **Connectivity**    | USB-C/Bluetooth/WiFi | Micro-USB/Bluetooth/WiFi | Micro-USB/WiFi |
 | **Power Source**    | Battery/USB | USB | Battery/USB |
 | **Battery Life**    | 8 hours | - | <1 hour |
-| **Software Support** | OpenBCI | Custom GUI | Custom GUI |
+| **Software Support** | Custom python code | Custom GUI | Custom GUI |
 | **Form Factor**     | Button Snap Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ Custom Headband |
 | **Communication Protocols** | SPI, ESPNOW, UART | SPI, BLE | UDP WebSocket |
+| **Price**          | ~$375    | ~$100    | ~$50    |
 
 \* The ADS1299 has the capabilities to daisy chain, therefore expanding the channel number from 8 to 16 but it is not implemented on the custom PCB. Refer to the ADS1299 PCB folder for additional information.
 
@@ -29,13 +29,13 @@ We provide various levels to users depending on cost, precision, and usability:
 [^3]: Refer to [rpi_low_cost\gh0st\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/rpi_low_cost/Gh0st) for more information on the setup and specifics for the system.
 
 ## Completed Work/In Progress for Milestone Release Candidate
+- **Working High Performance Pipeline (ESP32 + ADS1299)**: The lightweight, 3D-printed headset integrates a single data processing board with an 8-hour rechargeable battery (USB-C) in a custom designed 3D-printed protective casing for durability. A high-performance EEG pipeline ensures ultra-low noise, real-time wireless signal processing. Using an EEG ESP32 board linked to an ESP32-C6, data is captured at 250 samples/sec, processed in Python, and visualized via OpenBCI GUI or a custom interface. The 8-channel end-to-end system transmits data wirelessly via ESP-NOW, requiring no router and keeping the laptop connected to the internet.
 - **Working High Cost Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
   - Work in process on registering eye blinks from the system.
 - **Working Low Cost Circuit/Pipeline**: A working filtering circuit and communication was completed by connecting a custom electrode headband to the circuit and RPi Pico w. 
   - Work in process on creating a stable prototype that connects to the GUI for real-time sampling.
 - **Optimizing Real Time Reading on the GUI**: The GUI is able to read in real time with minimal frame lag in the plotting features. Latency is prevalent in between the ESP32 SPI sampling and the GUI processing of about 10-15 seconds. 
   - Work in progress in integrating real-time signal processing and ml model application.
-- **Working High Performance Pipeline**: A high-performance EEG pipeline seamlessly acquires, transmits, and processes brain signals with ultra-low noise and real-time wireless efficiency. Using a EEG ESP32 development board connected to a ESP32 C6, data can be successfully read and processed for valid information using the OpenBCI GUI. Alpha waves (8-10 Hz) were successfully detected, confirming neural activity.
 - **Second Version ADS1299 PCB Design**: A new design of the custom ADS1299 PCB is created to decrease the size of the first version and have the addition of headers to connect microcontroller directly to for a smaller and more stable package. 
   - The design is still being iterated upon and tested before sending for printing.  
 - **Signal Preprocessing** : The EEG signal preprocessing pipeline is fully implemented, ensuring artifact removal, filtering, and independent component extraction before further processing. FastICA, InfoMax, NLMS and VSS-APA are implemented to extract information components from raw EEG signals in real-time. 
@@ -46,10 +46,15 @@ We provide various levels to users depending on cost, precision, and usability:
 ### <p align="center">**High Performance Development Board**[^1]</p>
 | <div style="width:400px">Hardware Architecture & Wiring</div> | Components | Communication Protocols |
 |--------|---------|---------|
-| ![High Performance Board](https://github.com/user-attachments/assets/ce3bbd09-0870-42f1-9bc7-f2d55ca7b32b) | - OpenBCI 3D Headset Design<br> - Button Snap Electrodes<br> - EEG ESP Development Board with ESP32-S3 <br> - XIAO ESP32-C6<br> | - SPI communication between ADS1299 chip and ESP32-S3<br> - ESP-NOW WiFi data transmission between Development Board and ESP32-C6<br> - UART serialized data transmission through USB-C connection between ESP32-C6 and computer receiver <br> |
+| ![High Performance Board](https://github.com/user-attachments/assets/ce3bbd09-0870-42f1-9bc7-f2d55ca7b32b) | - OpenBCI 3D Headset Design<br> - Depth-adjustable spring loaded 3D printed assembly with metal snap electrodes provides good signal strength for EEG signals <br> - EEG ESP Development Board with ESP32-S3 <br> - XIAO ESP32-C6<br> | - SPI communication between ADS1299 chip and ESP32-S3<br> - ESP-NOW WiFi data transmission between Development Board and ESP32-C6<br> - UART serialized data transmission through USB-C connection between ESP32-C6 and computer receiver <br> |
 
 - **Software**
-  - Once the ESP32-C6 captures the incoming EEG data from the ESP32-S3, the UART data is captured through a python script. The data is then transcribed into a OpenBCI formatted txt file to visualize through **OpenBCI GUI**.
+ - Once the ESP32-C6 captures the incoming EEG data from the ESP32-S3, the UART data is captured through a python script and written to a file. The captured EEG data in this file can be viewed using OpenBCI GUI. The EEG data in this file will be feed to the machine learning model to draw inferences after analysis of the data.
+ - A python script is employed to label and timestamp the 8-channel EEG blinking data. This script facilitates the real-time processing and organization of the data, ensuring that each blink event is accurately marked with its corresponding timestamp for subsequent analysis.
+![data collection stages](https://github.com/user-attachments/assets/1e4aa29c-b1bf-421d-8bab-5dd617b7926b)
+
+   
+**OpenBCI GUI**.
 
 ### <p align="center">**Balanced Performance Board**[^2]</p>
 | <div style="width:600px">Hardware Architecture & Wiring</div> | Components | Communication Protocols |
