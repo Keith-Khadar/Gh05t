@@ -71,7 +71,7 @@ We provide various levels to users depending on cost, precision, and usability:
 |--------|---------|---------|
 | <img src="https://github.com/user-attachments/assets/0a12550a-8cac-404f-81ee-4bf6df63b5ae" alt="drawing" width="600" style/> | - Custom Filtering and Component Circuit on breadboard/featherboard <br> - Raspberry Pi Pico W <br> | - TCP WebSocket data transmission between Raspberry Pi Pico W and computer receiver |
 - **Software**
-  - Once the Raspberry Pi Pico W is supplied power,TCP WebSocket is opened and transmits data to any device that connects to the server. The **GH05T GUI** is used to connect to the WebSocket server and read incoming real-time data. 
+  - Once the Raspberry Pi Pico W is supplied power,UDP WebSocket is opened and transmits data to any device that connects to the server. The **GH05T GUI** is used to connect to the WebSocket server and read incoming real-time data. 
 
 ### <p align="center">**GH05T Graphic User Interface**[^4]</p>
 | <div style="width:300px">Function and Feature Architecture</div> | Visuals/GUI |
