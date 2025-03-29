@@ -29,6 +29,7 @@ We provide various levels to users depending on cost, precision, and usability:
 [^3]: Refer to [rpi_low_cost\gh0st\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/rpi_low_cost/Gh0st) for more information on the setup and specifics for the system.
 
 ## Completed Work/In Progress for Milestone Release Candidate
+- **Working High Performance Pipeline (ESP32 + ADS1299)**: The lightweight, 3D-printed headset integrates a single data processing board with an 8-hour rechargeable battery (USB-C) in a custom designed 3D-printed protective casing for durability. A high-performance EEG pipeline ensures ultra-low noise, real-time wireless signal processing. Using an EEG ESP32 board linked to an ESP32-C6, data is captured at 250 samples/sec, processed in Python, and visualized via OpenBCI GUI or a custom interface. The 8-channel end-to-end system transmits data wirelessly via ESP-NOW, requiring no router and keeping the laptop connected to the internet.
 - **Labeling Data from High Cost Pipeline**: Labeling data for the incoming EEG data in the system for training machine learning models was completed.
 - **Working Balanced Performance Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
   - Work in progress on registering eye blinks from the system.
