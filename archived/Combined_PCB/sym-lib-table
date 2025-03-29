@@ -1,0 +1,8 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "MCP1640BT")(type "KiCad")(uri "${KIPRJMOD}/ProjectLibraries/MCP1640/2025-03-06_16-07-10.kicad_sym")(options "")(descr ""))
+  (lib (name "W3A45C102K4T2A (C_array)")(type "KiCad")(uri "${KIPRJMOD}/ProjectLibraries/W3A45C102K4T2A/CKCL44X7R1H102M085AA.kicad_sym")(options "")(descr ""))
+  (lib (name "ADS1299")(type "KiCad")(uri "${KIPRJMOD}/ProjectLibraries/ADS1299/ADS1299IPAG.kicad_sym")(options "")(descr ""))
+  (lib (name "LSM6DSOX")(type "KiCad")(uri "${KIPRJMOD}/ProjectLibraries/LSM6DSOX/LSM6DSOX.kicad_sym")(options "")(descr ""))
+  (lib (name "TPD4E1B06 (ESD)")(type "KiCad")(uri "${KIPRJMOD}/ProjectLibraries/TPD4E1B06/2024-10-26_00-01-39.kicad_sym")(options "")(descr ""))
+)
