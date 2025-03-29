@@ -22,7 +22,7 @@ We provide various levels to users depending on cost, precision, and usability:
 | **Communication Protocols** | SPI, ESPNOW, UART | SPI, BLE | UDP WebSocket |
 | **Price**          | ~$375    | ~$100    | ~$50    |
 
-\* The ADS1299 has the capabilities to daisy chain, therefore expanding the channel number from 8 to 16 but it is not implemented on the custom PCB. Refer to the ADS1299 PCB folder for additional information.
+\* The ADS1299 has the capabilities to daisy chain, therefore expanding the channel number from 8 to 16 but it is not fully implemented on the custom PCB. Refer to the ADS1299 PCB folder for additional information.
 
 [^1]: Refer to [Reading_EEG_Data\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Reading_EEG_Data) for more information on the setup and specifics for the system.
 [^2]: Refer to [esp32\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/esp32) for more information on the setup and specifics for the system.
