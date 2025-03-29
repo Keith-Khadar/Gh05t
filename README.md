@@ -29,7 +29,8 @@ We provide various levels to users depending on cost, precision, and usability:
 [^3]: Refer to [rpi_low_cost\gh0st\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/rpi_low_cost/Gh0st) for more information on the setup and specifics for the system.
 
 ## Completed Work/In Progress for Milestone Release Candidate
-- **Labeling Data from High Performance Pipeline (ESP32 + ADS1299)**: Labeling data for the incoming EEG data in the system for training machine learning models was completed.
+- **Labeling Data from High Performance Pipeline (ESP32 + ADS1299)**: The labelling of the incoming EEG data for training machine learning pipeline was completed.
+- **3D modelling of protective case for High Performance Pipeline (ESP32 + ADS1299)** A 3D model of a custom-designed protective case designed to safeguard a high-performance board from physical damage, environmental factors, and overheating.
 - **Working Balanced Performance Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
   - Work in progress on registering eye blinks from the system.
 - **Working Low Cost Circuit/Pipeline**: The low cost was fully connected to the GH05T GUI and is able to read incoming data through the WebSocket.
@@ -51,6 +52,7 @@ We provide various levels to users depending on cost, precision, and usability:
 - **Software**
   - Once the ESP32-C6 captures the incoming EEG data from the ESP32-S3, the UART data is captured through a python script and written to a file. The captured EEG data in this file can be viewed using OpenBCI GUI. The EEG data in this file will be feed to the machine learning model to draw inferences after analysis of the data.
   - A python script is employed to label and timestamp the 8-channel EEG blinking data. This script facilitates the real-time processing and organization of the data, ensuring that each blink event is accurately marked with its corresponding timestamp for subsequent analysis.
+  - An end-to-end high-performance EEG pipeline leverages an ESP32 EEG board and ESP32-C6 to wirelessly transmit 8-channel, ultra-low-noise data at 250 samples/sec via ESP-NOW, enabling real-time processing in Python and visualization through OpenBCI GUI or a custom interface.
   <p align="center">
   <img src="https://github.com/user-attachments/assets/1e4aa29c-b1bf-421d-8bab-5dd617b7926b" alt="data collection stages" width="500" />
   <img src="https://github.com/user-attachments/assets/d988fad5-ef7a-4597-9178-4c8908839831" alt="fft plot" width="500" />
