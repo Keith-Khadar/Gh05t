@@ -50,7 +50,9 @@ We provide various levels to users depending on cost, precision, and usability:
 
 - **Software**
   - Once the ESP32-C6 captures the incoming EEG data from the ESP32-S3, the UART data is captured through a python script and written to a file. The captured EEG data in this file can be viewed using OpenBCI GUI. The EEG data in this file will be feed to the machine learning model to draw inferences after analysis of the data.
-   <img src="https://github.com/user-attachments/assets/1e4aa29c-b1bf-421d-8bab-5dd617b7926b" alt="data collection stages" width="500" />
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1e4aa29c-b1bf-421d-8bab-5dd617b7926b" alt="data collection stages" width="500" />
+</p>
   - A python script is employed to label and timestamp the 8-channel EEG blinking data. This script facilitates the real-time processing and organization of the data, ensuring that each blink event is accurately marked with its corresponding timestamp for subsequent analysis.
 
 
