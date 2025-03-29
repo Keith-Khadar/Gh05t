@@ -59,7 +59,7 @@ The user first must specify how they are inputting data to be read. There are fo
 Once the data is imported, the user has the ability to add and remove plots from the visual. They can play or stop the incoming data stream to look closer at the plots. Additionally, there is a button to allow the user to export the data if they want to create a local file on their machine with the incoming data stream.
 
 ## Troubleshooting/Known Bugs
-- None.
+- When applying filtering, after applying labeling, the button for the apply filter will sometimes disappear.
 
 ## Future Work
 - The GUI can currently only read from .edf files when uploading. Future work would include expanding the capabilities to .dat and .txt files. 
