@@ -16,7 +16,7 @@ We provide various levels to users depending on cost, precision, and usability:
 | **Microcontroller** | XIAO ESP32-C6   | DFRobot Firebeetle ESP32 32D   | Raspberry Pi Pico W |
 | **Connectivity**    | USB-C/Bluetooth/WiFi | Micro-USB/Bluetooth/WiFi | Micro-USB/WiFi |
 | **Power Source**    | Battery/USB | Battery/USB | Battery/USB |
-| **Battery Life**    | 8 hours | - | <1 hour |
+| **Battery Life**    | 8 hours | 8 hours | <1 hour |
 | **Software Support** | Custom python code | Custom GUI | Custom GUI |
 | **Form Factor**     | Button Snap Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ Custom Headband |
 | **Communication Protocols** | SPI, ESPNOW, UART | SPI, BLE | UDP WebSocket |
