@@ -29,15 +29,15 @@ We provide various levels to users depending on cost, precision, and usability:
 [^3]: Refer to [rpi_low_cost\gh0st\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/rpi_low_cost/Gh0st) for more information on the setup and specifics for the system.
 
 ## Completed Work/In Progress for Milestone Release Candidate
-- **Working High Performance Pipeline (ESP32 + ADS1299)**: The lightweight, 3D-printed headset integrates a single data processing board with an 8-hour rechargeable battery (USB-C) in a custom designed 3D-printed protective casing for durability. A high-performance EEG pipeline ensures ultra-low noise, real-time wireless signal processing. Using an EEG ESP32 board linked to an ESP32-C6, data is captured at 250 samples/sec, processed in Python, and visualized via OpenBCI GUI or a custom interface. The 8-channel end-to-end system transmits data wirelessly via ESP-NOW, requiring no router and keeping the laptop connected to the internet.
-- **Working High Cost Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
-  - Work in process on registering eye blinks from the system.
-- **Working Low Cost Circuit/Pipeline**: A working filtering circuit and communication was completed by connecting a custom electrode headband to the circuit and RPi Pico w. 
-  - Work in process on creating a stable prototype that connects to the GUI for real-time sampling.
-- **Optimizing Real Time Reading on the GUI**: The GUI is able to read in real time with minimal frame lag in the plotting features. Latency is prevalent in between the ESP32 SPI sampling and the GUI processing of about 10-15 seconds. 
-  - Work in progress in integrating real-time signal processing and ml model application.
-- **Second Version ADS1299 PCB Design**: A new design of the custom ADS1299 PCB is created to decrease the size of the first version and have the addition of headers to connect microcontroller directly to for a smaller and more stable package. 
-  - The design is still being iterated upon and tested before sending for printing.  
+- **Labeling Data from High Cost Pipeline**: Labeling data for the incoming EEG data in the system for training machine learning models was completed.
+- **Working Balanced Performance Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
+  - Work in progress on registering eye blinks from the system.
+- **Working Low Cost Circuit/Pipeline**: The low cost was fully connected to the GH05T GUI and is able to read incoming data through the WebSocket.
+  - Work in progress on testing the analog mux on 8 channel data and receiving significant EEG signals. Additionally, a PCB design is being created.
+- **Optimizing Real Time Reading on the GUI**: The GUI is able to read in real time with minimal frame lag in the plotting features. Latency is prevalent in between the ESP32 SPI sampling and the GUI processing of about 10-15 seconds. Topography map visuals were added for easier viewing of the electrode locations on the head. Signal processing such as filtering (low, high, band, and notch) were added with the ability to label data with 0 or 1. Lastly, the ability to use a SDED or NLSM model to label data based on emg thresholds (eye blinks) were added as well. 
+  - Work in progress in incorporating more variance in the SDED and/or NLSM model.
+- **Second Design Version ADS1299 PCB Design**: A new design of the custom ADS1299 PCB was created to decrease the size of the first version and have the addition of headers to connect microcontroller directly to for a smaller and more stable package. 
+  - Work in progress on getting the correct timing and interfacing.
 - **Signal Preprocessing** : The EEG signal preprocessing pipeline is fully implemented, ensuring artifact removal, filtering, and independent component extraction before further processing. FastICA, InfoMax, NLMS and VSS-APA are implemented to extract information components from raw EEG signals in real-time. 
 - **Event Detection/Prediction Model**: The EEG-based event detection pipeline and machine learning models have been developed to analyze real-time brain activity and infer motor function. NLMS, Batch-Wiener Filter and VSS-APA have been implemeted for predictions - Statistical Deviation Event Detection Model and Information Theoretic Learning Point Process Detection Models have been implemented for more sophisticed event flagging.
 
