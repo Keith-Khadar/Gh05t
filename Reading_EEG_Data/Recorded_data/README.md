@@ -48,5 +48,5 @@ The script creates a CSV file (`received_data.csv`) with the following columns:
 Figure: Sample CSV file
 
 ## Note
-- The data files can be fed into the machine learning model for gathering valuable insights from blinking data.
+- The data files can be fed into the machine learning pipeline for gathering valuable insights from blinking data.
 - Logging data to a file is a time-intensive process, which may introduce delays in recording all incoming data. As a result, capturing all samples per second may not always be achievable.
