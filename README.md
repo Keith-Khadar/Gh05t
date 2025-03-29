@@ -28,7 +28,7 @@ We provide various levels to users depending on cost, precision, and usability:
 [^2]: Refer to [esp32\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/esp32) for more information on the setup and specifics for the system.
 [^3]: Refer to [rpi_low_cost\gh0st\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/rpi_low_cost/Gh0st) for more information on the setup and specifics for the system.
 
-## Completed Work/In Progress for Milestone Release Candidat
+## Completed Work/In Progress for Milestone Release Candidate
 - **Labeling Data from High Performance Pipeline (ESP32 + ADS1299)**: Labeling data for the incoming EEG data in the system for training machine learning models was completed.
 - **Working Balanced Performance Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
   - Work in progress on registering eye blinks from the system.
