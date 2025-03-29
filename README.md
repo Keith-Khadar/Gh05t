@@ -20,7 +20,7 @@ We provide various levels to users depending on cost, precision, and usability:
 | **Battery Life**    | 8 hours | - | <1 hour |
 | **Software Support** | OpenBCI | Custom GUI | Custom GUI |
 | **Form Factor**     | Button Snap Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ Custom Headband |
-| **Communication Protocols** | SPI, ESPNOW, UART | SPI, BLE | TCP WebSocket |
+| **Communication Protocols** | SPI, ESPNOW, UART | SPI, BLE | UDP WebSocket |
 
 \* The ADS1299 has the capabilities to daisy chain, therefore expanding the channel number from 8 to 16 but it is not implemented on the custom PCB. Refer to the ADS1299 PCB folder for additional information.
 
