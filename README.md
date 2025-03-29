@@ -15,7 +15,7 @@ We provide various levels to users depending on cost, precision, and usability:
 | **Board** | EEG Development Board with ESP32-S3 | Custom PCB | Custom breadboard/featherboard circuit |
 | **Microcontroller** | XIAO ESP32-C6   | DFRobot Firebeetle ESP32 32D   | Raspberry Pi Pico W |
 | **Connectivity**    | USB-C/Bluetooth/WiFi | Micro-USB/Bluetooth/WiFi | Micro-USB/WiFi |
-| **Power Source**    | Battery/USB | USB | Battery/USB |
+| **Power Source**    | Battery/USB | Battery/USB | Battery/USB |
 | **Battery Life**    | 8 hours | - | <1 hour |
 | **Software Support** | Custom python code | Custom GUI | Custom GUI |
 | **Form Factor**     | Button Snap Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ OpenBCI Headset | 3D printed Claw Electrodes w/ Custom Headband |
