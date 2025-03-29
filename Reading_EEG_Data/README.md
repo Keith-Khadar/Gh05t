@@ -13,7 +13,7 @@ Figure:EEG dataset pipeline from data collection to visualization
 3. The ESP32-C6 receives the data and relays it to the Arduino Serial Monitor for verification.
 4. A Python script captures the data from the laptop's serial port and records it in a text file. 
 5. The data is formatted for compatibility with the OpenBCI GUI for visualization and further analysis.
-6. Additionally, another python script records the labeled data in csv file for evaluation using the machine learning model.
+6. Additionally, another python script records the labeled data in csv file for evaluation using the machine learning pipeline.
 7. Filtering techniques are applied to extract alpha wave frequencies (8-10 Hz), confirming the presence of neural activity.
 8. Initial testing involved verifying ADC readings with a DC voltage input, ensuring data accuracy before integrating electrodes.
    ![data collection stages](https://github.com/user-attachments/assets/1ad5dc23-a819-4ac8-99bb-d55ae5c50f29)
@@ -41,7 +41,7 @@ Figure:EEG dataset pipeline from data collection to visualization
 3. **SenderCode/SenderCode.h**: Header file containing function prototypes and constants used by SenderCode.cpp and SenderCode.ino.
 4. **SenderCode/SenderCode.cpp**: This file implements core functions for acquiring EEG signals and transmitting them via ESPNOW.
 5. **SenderCode/SenderCode.ino**: The main Arduino sketch for the ESP32 (EEG signal acquisition & transmission).
-6. **Recorded_Data/eeg_data_to_file.py:** The python script for collecting and labelling blinking EEG data (formatted for easy processing using machine learning model).
+6. **Recorded_Data/eeg_data_to_file.py:** The python script for collecting and labelling blinking EEG data (formatted for easy processing using machine learning pipeline).
 7. **Recorded_Data/labeled_data folder** This folder has 10 csv files of labelled EEG data.
 8. **Recorded_Data/unlabeled_data folder** This folder has 10 csv files of unlabelled EEG data.
 9. **High_performance_board_protective_case/high_performance_board_protective_case.stl** The 3D model of a custom-designed protective case meant to safeguard a high-performance board from physical damage, environmental factors, and overheating.
