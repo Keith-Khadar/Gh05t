@@ -80,8 +80,8 @@ We provide various levels to users depending on cost, precision, and usability:
 
 ### <p align="center">**GH05T Graphic User Interface**[^4]</p>
 
-| <div style="width:300px">Function and Feature Architecture</div>                             | Visuals/GUI                                                                                                                                                                                                      |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <div style="width:300px">Function and Feature Architecture</div> | Visuals/GUI  |
+| ----------------| ---------------------- |
 | ![GUI Flow](https://github.com/user-attachments/assets/a9a500f8-1eae-45d4-b21f-32e67913ea0e) | ![GUI Flow](https://github.com/user-attachments/assets/ed05217e-f655-4535-b095-f2ec6a256eff) [PyQt](https://doc.qt.io/qtforpython-6/) & [Matplotlib](https://matplotlib.org/): Widget and EEG Data Visualization |
 
 [^4]: Refer to [Gh05t GUI\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Gh05t%20GUI) for more information on the setup and specifics on the GUI.
