@@ -24,9 +24,9 @@ We provide various levels to users depending on cost, precision, and usability:
 
 \* The ADS1299 has the capabilities to daisy chain, therefore expanding the channel number from 8 to 16 but it is not fully implemented on the custom PCB. Refer to the ADS1299 PCB folder for additional information.
 
-[^1]: Refer to [Reading_EEG_Data\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Reading_EEG_Data) for more information on the setup and specifics for the system.
-[^2]: Refer to [esp32\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/esp32) for more information on the setup and specifics for the system.
-[^3]: Refer to [rpi_low_cost\gh0st\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/rpi_low_cost/Gh0st) for more information on the setup and specifics for the system.
+[^1]: Refer to [High_Performance\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/High_Performance) for more information on the setup and specifics for the system.
+[^2]: Refer to [Balanced_Performance\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Balanced_Performance) for more information on the setup and specifics for the system.
+[^3]: Refer to [Low_Cost\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Low_Cost) for more information on the setup and specifics for the system.
 
 ## Completed Work/In Progress for Milestone Release Candidate
 
@@ -47,8 +47,8 @@ We provide various levels to users depending on cost, precision, and usability:
 
 ### <p align="center">**High Performance Development Board**[^1]</p>
 
-| <div style="width:400px">Hardware Architecture & Wiring</div>                                              | Components                                                                                                                                                                                                                                                                            | Communication Protocols                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <div style="width:400px">Hardware Architecture & Wiring</div>  | Components  | Communication Protocols  |
+| ----------------------- | ----------------------- | ----------------------- |
 | ![High Performance Board](https://github.com/user-attachments/assets/ce3bbd09-0870-42f1-9bc7-f2d55ca7b32b) | - OpenBCI 3D Headset Design<br> - Depth-adjustable spring loaded 3D printed assembly with metal snap electrodes provides good signal strength for EEG signals <br> - EEG ESP Development Board with ESP32-S3 <br> - XIAO ESP32-C6<br> - Protective case for the development board<br> | - SPI communication between ADS1299 chip and ESP32-S3<br> - ESP-NOW WiFi data transmission between Development Board and ESP32-C6<br> - UART serialized data transmission through USB-C connection between ESP32-C6 and computer receiver <br> |
 
 -   **Software**
@@ -62,17 +62,17 @@ We provide various levels to users depending on cost, precision, and usability:
 
 ### <p align="center">**Balanced Performance Board**[^2]</p>
 
-| <div style="width:600px">Hardware Architecture & Wiring</div>                                                                                                                                                                                                                                                                                                                                                                                                            | Components                                                                                                                    | Communication Protocols                                                                                                                               |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://github.com/user-attachments/assets/90f90b59-3fc4-4933-9542-4793f8f74661" alt="drawing" width="1000" style/> <img src="https://raw.githubusercontent.com/Keith-Khadar/Gh05t/refs/heads/main/Balanced_Performance_Hardware/Images/PCB.PNG" alt="drawing" width="190" style/> <img src="https://raw.githubusercontent.com/Keith-Khadar/Gh05t/refs/heads/main/Balanced_Performance_Hardware/Images/PCB_Render_Above.png" alt="drawing" width="190" style/> | - OpenBCI 3D Headset Design<br> - 3D Printed Claw Electrodes<br> - Custom ADS1299 PCB<br> - DFRobot Firebeetle ESP32 32D <br> | - SPI communication between the ADS1299 PCB and Firebeetle ESP32 <br> - BLE data transmission between the Firebeetle ESP32 and computer receiver <br> |
+| <div style="width:450px">Hardware Architecture & Wiring</div>  | Components  | Communication |
+| ----------------------- | ----------------------- | ----------------------- |
+| <img src="https://github.com/user-attachments/assets/90f90b59-3fc4-4933-9542-4793f8f74661" alt="drawing" width="1000" style/> <img src="https://github.com/Keith-Khadar/Gh05t/blob/main/Balanced_Performance/Images/PCB.PNG?raw=true" alt="drawing" width="190" style/> <img src="https://github.com/Keith-Khadar/Gh05t/blob/main/Balanced_Performance/Images/PCB_Render_Above.png?raw=true" alt="drawing" width="190" style/> | - OpenBCI 3D Headset Design<br> - 3D Printed Claw Electrodes<br> - Custom ADS1299 PCB<br> - DFRobot Firebeetle ESP32 32D <br> | - SPI communication between the ADS1299 PCB and Firebeetle ESP32 <br> - BLE data transmission between the Firebeetle ESP32 and computer receiver <br> |
 
 -   **Software**
     -   Once the Firebeetle ESP32 is supplied power, the BLE server is turned on and ready to transmit data to any device that connects to the server. The **GH05T GUI** is used to connect to the BLE server and read incoming real-time data.
 
 ### <p align="center">**Low Cost Filtering Circuit**[^3]</p>
 
-| <div style="width:500px">Hardware Architecture & Wiring</div>                                                                | Components                                                                                          | Communication Protocols                                                             |
-| ---------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| <div style="width:500px">Hardware Architecture & Wiring</div>   | Components | Communication Protocols |
+| ----------------------- | ----------------------- | ----------------------- |
 | <img src="https://github.com/user-attachments/assets/0a12550a-8cac-404f-81ee-4bf6df63b5ae" alt="drawing" width="600" style/> | - Custom Filtering and Component Circuit on breadboard/featherboard <br> - Raspberry Pi Pico W <br> | - TCP WebSocket data transmission between Raspberry Pi Pico W and computer receiver |
 
 -   **Software**
@@ -84,7 +84,7 @@ We provide various levels to users depending on cost, precision, and usability:
 | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ![GUI Flow](https://github.com/user-attachments/assets/a9a500f8-1eae-45d4-b21f-32e67913ea0e) | ![GUI Flow](https://github.com/user-attachments/assets/ed05217e-f655-4535-b095-f2ec6a256eff) [PyQt](https://doc.qt.io/qtforpython-6/) & [Matplotlib](https://matplotlib.org/): Widget and EEG Data Visualization |
 
-[^4]: Refer to [eeq_gui_PyQt\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/eeg_gui_PyQt) for more information on the setup and specifics on the GUI.
+[^4]: Refer to [Gh05t GUI\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Gh05t%20GUI) for more information on the setup and specifics on the GUI.
 
 ### <p align="center">**Signal Processing and Machine Learning**[^5]</p>
 
@@ -108,7 +108,7 @@ We provide various levels to users depending on cost, precision, and usability:
         -   Pre-Training: PCA-Pretraining for optimal features
         -   Training: Network Tuning based on Target Data
 
-[^5]: Refer to [signal-processing\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/signal-preprocessing) and [ml-model\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/ml-model) for more information on the setup and specifics.
+[^5]: Refer to [Machine_Learning\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Machine_Learning) for more information on the setup and specifics.
 
 ## Known Bugs
 
