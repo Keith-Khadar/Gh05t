@@ -32,7 +32,7 @@ The specifications include:
 
 |  ADS1299 Breakout Board  |  Balanced Backpack Board  |
 | --- | --- |
-| ![Image](https://github.com/Keith-Khadar/Gh05t/blob/main/Balanced_Performance/Images/PCB_Render_Above.png?raw=true){ width=300px } | ![Image](https://github.com/Keith-Khadar/Gh05t/blob/main/Balanced_Performance/Images/ADS1299_Breakout_Top_View.png?raw=true){ width=520px } |
+| ![Image](https://github.com/Keith-Khadar/Gh05t/blob/main/Balanced_Performance/Images/PCB_Render_Above.png?raw=true) | ![Image](https://github.com/Keith-Khadar/Gh05t/blob/main/Balanced_Performance/Images/ADS1299_Breakout_Top_View.png?raw=true) |
 
 ## Setup Instructions
 ### 1. Wiring
