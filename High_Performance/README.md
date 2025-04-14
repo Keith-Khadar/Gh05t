@@ -3,7 +3,7 @@
 ## Overview:
 The High-Performance Microcontroller Board integrates a 24-bit ADC to capture high-resolution EEG signals and transmits the data wirelessly using an ESP32-based development board. 
 The setup allows seamless data transfer to an ESP32-C6 module, which then relays the EEG data over WiFi (ESPNOW) to a connected laptop for analysis and visualization.
-![image](https://github.com/user-attachments/assets/c5a23742-a585-44a6-a287-80a1af19ad99)
+![image](https://github.com/user-attachments/assets/612c3977-4341-486e-8c53-9f848af68a49)
 
 Figure:EEG dataset pipeline from data collection to visualization
 
