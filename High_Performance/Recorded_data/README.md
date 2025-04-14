@@ -43,6 +43,7 @@ The script creates a CSV file (`received_data.csv`) with the following columns:
 - Eyes closed (1 if `Tab` is pressed, 0 otherwise)
 
 ![image](https://github.com/user-attachments/assets/5133e521-4e2c-4f54-bab3-1245036c9915)
+
 Figure: Sample CSV file
 
 ## Note
