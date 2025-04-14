@@ -1,18 +1,16 @@
 # EEG data collection and labelling
 
 ## Overview
-This project captures the 8 channel EEG data, processes the received hex values into decimal format, and logs them into a CSV file. The script also records whether the user's eyes are closed based on keyboard input (tab key).
-
-## Files
-- eeg_data_to_file.py: The python script for collecting and labelling blinking EEG data (10 seconds).
-- labeled_data folder: This folder has 10 csv files of labelled EEG data.
-- unlabeled_data folder: This folder has 10 csv files of unlabelled EEG data.
+This project captures the 8 channel EEG data, processes the received hex values into decimal format, and logs them into a CSV file. The script also allows live labeling of data based on whether the user’s eyes are open or closed, using simple keyboard input ('c' for closed, 'o' for open).
 
 ## Features
-- Reads data from an ESP32 via a serial connection
-- Converts hexadecimal EEG readings into decimal values
-- Logs data with a timestamp in a CSV file
-- Detects "Eyes closed" state using the `Tab` key by running a background keyboard listener
+- Reads data from an ESP32 via a serial connection.
+- Converts hexadecimal EEG readings into decimal values.
+- Logs data with a timestamp in a CSV file.
+- Allows real-time labeling using the keyboard:
+'c' → Mark as "eyes closed"
+'o' → Mark as "eyes open"
+- Keyboard listener runs in a background thread while collecting data.
 
 ## Installation
 ### Prerequisites
@@ -21,7 +19,7 @@ Ensure you have Python installed on your system.
 ### Required Python Packages
 Install the required dependencies using pip:
 ```sh
-pip install pynput
+pip install pyserial
 ```
 
 ## Hardware Setup
@@ -34,8 +32,8 @@ pip install pynput
    python3 eeg_data_to_file.py
    ```
 2. The script will automatically start listening for incoming serial data.
-3. Press the `Tab` key to indicate that your eyes are closed. Release it to reset the state.
-4. Press `Esc` to stop the script.
+3. Press the `c` key to indicate that your eyes are closed and press `o` key to indicate that your eyes are open.
+4. Press `Ctrl+C` to stop the script.
 
 ## File Output
 The script creates a CSV file (`received_data.csv`) with the following columns:
@@ -44,7 +42,7 @@ The script creates a CSV file (`received_data.csv`) with the following columns:
 - Timestamp
 - Eyes closed (1 if `Tab` is pressed, 0 otherwise)
 
-![image](https://github.com/user-attachments/assets/4a46b578-f61c-4438-a378-ca1189c3cf49)
+![image](https://github.com/user-attachments/assets/5133e521-4e2c-4f54-bab3-1245036c9915)
 Figure: Sample CSV file
 
 ## Note
