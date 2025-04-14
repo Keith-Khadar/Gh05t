@@ -483,7 +483,7 @@
       "plot": "Outputs/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "ADS1299_Breakout_Board.step",
       "svg": "",
       "vrml": ""
     },
