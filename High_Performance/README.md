@@ -37,14 +37,12 @@ Figure:EEG dataset pipeline from data collection to visualization
 
 ## Files
 1. **document_data.py**: This Python script is responsible for capturing and processing the EEG data received from the ESP32-C6 over the serial port (formatted for viewing using OpenBCI GUI).
-2. **ReceiverCode/ReceiverCode.ino**: This Arduino sketch runs on the ESP32-C6, which acts as the receiver of the EEG data transmitted via WiFi (ESPNOW).
-3. **SenderCode/SenderCode.h**: Header file containing function prototypes and constants used by SenderCode.cpp and SenderCode.ino.
-4. **SenderCode/SenderCode.cpp**: This file implements core functions for acquiring EEG signals and transmitting them via ESPNOW.
-5. **SenderCode/SenderCode.ino**: The main Arduino sketch for the ESP32 (EEG signal acquisition & transmission).
+2. **Firmware/ReceiverCode/ReceiverCode.ino**: This Arduino sketch runs on the ESP32-C6, which acts as the receiver of the EEG data transmitted via WiFi (ESPNOW).
+3. **Firmware/SenderCode/SenderCode.h**: Header file containing function prototypes and constants used by SenderCode.cpp and SenderCode.ino.
+4. **Firmware/SenderCode/SenderCode.cpp**: This file implements core functions for acquiring EEG signals and transmitting them via ESPNOW.
+5. **Firmware/SenderCode/SenderCode.ino**: The main Arduino sketch for the ESP32 (EEG signal acquisition & transmission).
 6. **Recorded_Data/eeg_data_to_file.py:** The python script for collecting and labelling blinking EEG data (formatted for easy processing using machine learning pipeline).
-7. **Recorded_Data/labeled_data folder** This folder has 10 csv files of labelled EEG data.
-8. **Recorded_Data/unlabeled_data folder** This folder has 10 csv files of unlabelled EEG data.
-9. **High_performance_board_protective_case/high_performance_board_protective_case.stl** The 3D model of a custom-designed protective case meant to safeguard a high-performance board from physical damage, environmental factors, and overheating.
+7. **CAD/high_performance_board_protective_case.stl** The 3D model of a custom-designed protective case meant to safeguard a high-performance board from physical damage, environmental factors, and overheating.
 
 ## **Installation & Setup**
 
