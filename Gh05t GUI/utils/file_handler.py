@@ -23,7 +23,6 @@ class FileHandler:
                 try:
                     data_batch = []
                     while len(data_batch) < 100:
-                        # Modified to accept (timestamp, channels, label)
                         data = self.data_queue.get(timeout=0.1)
                         data_batch.append(data)
                 except Empty:
@@ -32,11 +31,10 @@ class FileHandler:
                 if data_batch:
                     packed = b''
                     for timestamp, channels, label in data_batch:
-                        # Pack with label flag (1=has label, 0=no label)
                         has_label = 1 if label is not None else 0
                         label_value = label if has_label else 0.0
                         packed += struct.pack(
-                            '<I8fBf',  # New format: timestamp, 8 channels, flag, label
+                            '<I8fBf',
                             timestamp,
                             *channels,
                             has_label,

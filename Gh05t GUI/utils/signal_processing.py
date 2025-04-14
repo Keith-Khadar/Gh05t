@@ -162,12 +162,12 @@ class SignalProcessingWindow(QDialog):
         self.notch_states = {}
 
         self.model_buffer = []
-        self.buffer_size = 250
+        self.buffer_size = 500
 
-        self.alpha = 0.1
-        self.alpha_delta = 0.01
-        self.delta_init = 10
-        self.use_adaptive = True
+        self.alpha = 0.01
+        self.alpha_delta = 0.01 # adaptive change
+        self.delta_init = 100 # threshold
+        self.use_adaptive = True 
         self.eff_dc = [0.0] * 8
         self.delta = [self.delta_init] * 8
 
@@ -222,7 +222,7 @@ class SignalProcessingWindow(QDialog):
             self.notch_states.clear()
         self.update_status_signal.emit("Filter cleared.")
 
-    def butter_filter(self, data, fs, cutoff, btype, order=5, rt=0):
+    def butter_filter(self, data, fs, cutoff, btype, order=5, rt=0, channel=0):
         """Create a Butterworth filter and apply it to the data."""
         nyquist = 0.5 * fs
         if btype == "band":
@@ -239,22 +239,22 @@ class SignalProcessingWindow(QDialog):
                 y = filtfilt(b, a, data)
             self.filtered_data = y
         else:
-            key = (tuple(cutoff), btype, order)
+            key = (tuple(cutoff), btype, order, channel)
             if key not in self.butter_states:
                 b, a = butter(order, normal_cutoff, btype=btype)
                 zi = lfilter_zi(b, a)
-                self.butter_states[key] = {'b': b, 'a': a, 'zi': zi.copy()}
+                self.butter_states[key] = {'b': b, 'a': a, 'zi': zi}
 
             b = self.butter_states[key]['b']
             a = self.butter_states[key]['a']
             zi = self.butter_states[key]['zi']
 
-            y, zo = lfilter(b, a, data, zi=zi * data[0])
-
+            # Remove scaling by data[0] (zi is already correct)
+            y, zo = lfilter(b, a, data, zi=zi)
             self.butter_states[key]['zi'] = zo
         return y
     
-    def notch_filter(self, data, freq, fs, Q=30, rt=0):
+    def notch_filter(self, data, freq, fs, Q=30, rt=0, channel=0):
         if rt == 0:
             notch_freq_hz = freq
             quality_factor = Q
@@ -263,22 +263,16 @@ class SignalProcessingWindow(QDialog):
             y = sosfiltfilt(sos_notch, data)
             self.filtered_data = y
         else:
-            key = (freq, Q)
+            key = (freq, Q, channel)
             if key not in self.notch_states:
                 b, a = iirnotch(freq, Q, fs)
                 zi = lfilter_zi(b, a)
-                self.notch_states[key] = {
-                    'b': b,
-                    'a': a,
-                    'zi': zi.copy()
-                }
+                self.notch_states[key] = {'b': b, 'a': a, 'zi': zi}
 
             b = self.notch_states[key]['b']
             a = self.notch_states[key]['a']
             zi = self.notch_states[key]['zi']
-
-            y, zo = lfilter(b, a, data, zi=zi * data[0])
-
+            y, zo = lfilter(b, a, data, zi=zi)
             self.notch_states[key]['zi'] = zo
         return y
 
@@ -373,6 +367,7 @@ class SignalProcessingWindow(QDialog):
             self.clear_model_button.setVisible(True)
             self.apply_ml_button.setVisible(False)
         self.model_path = settings.value("model_path", None)
+        self.model_buffer = settings.value("model_buffer", [])
 
         self.labeling_mode = settings.value("labeling_mode", "False") == "True"
         self.labeling_mode_checkbox.setChecked(self.labeling_mode)
@@ -404,6 +399,7 @@ class SignalProcessingWindow(QDialog):
         settings.setValue("freq_max", self.freq_max_input.currentText())
         settings.setValue("freq_range", self.freq_range)
         settings.setValue("model", self.model)
+        settings.setValue("model_buffer", self.model_buffer)
         settings.setValue("model_path", self.model_path)
         settings.setValue("labeling_mode", str(self.labeling_mode_checkbox.isChecked()))
         settings.setValue("original_data", self.original_data)
@@ -413,47 +409,63 @@ class SignalProcessingWindow(QDialog):
         settings.setValue("notch_states", self.notch_states)
 
     # model for emg
-    def detect_emg(self, raw_data):
+    def detect_emg(self, raw_data, buffer):
         """
-        Process one sample of 8-channel data through EMG detection pipeline.
+        Process data through EMG detection pipeline with moving average
         Returns: (spikes, filtered_data)
         """
         spikes = [0] * 8
         measurements = [0] * 8
-        
+
+        # Calculate moving average for each channel
+        moving_avg = np.mean(buffer, axis=1, keepdims=True)
+        deviated_sample = raw_data - moving_avg
+
         for ch in range(8):
-            x = raw_data[ch]
+            x = deviated_sample[ch, 0]
             
             if self.use_adaptive:
-                self.eff_dc[ch], self.delta[ch], measurements[ch], spikes[ch] = self._apply_sded_adaptive(x, self.eff_dc[ch], self.alpha, self.alpha_delta, self.delta[ch])
+                (self.eff_dc[ch], self.delta[ch], 
+                measurements[ch], spikes[ch]) = self._apply_sded_adaptive(
+                    x, self.eff_dc[ch], self.alpha, self.alpha_delta, self.delta[ch]
+                )
             else:
-                self.eff_dc[ch], measurements[ch], spikes[ch] = self._apply_sded_fixed(x, self.eff_dc[ch], self.alpha, self.delta[ch])
+                (self.eff_dc[ch], measurements[ch], 
+                spikes[ch]) = self._apply_sded_fixed(
+                    x, self.eff_dc[ch], self.alpha, self.delta[ch]
+                )
 
         return np.array(spikes), raw_data
-     
+
     @staticmethod
     def _apply_sded_fixed(x, eff_dc, alpha, delta):
+        """Fixed threshold version with moving average compensation"""
         meas = np.abs(x - eff_dc)
         alpha_red = alpha/2
+        
         if meas > delta:
-            new_eff_dc = alpha_red * x + (1 - alpha_red) * eff_dc
+            new_eff_dc = alpha_red * (x + eff_dc) / 2 + (1 - alpha_red) * eff_dc
             spike = 1
         else:
             new_eff_dc = alpha * x + (1 - alpha) * eff_dc
             spike = 0
+            
         return new_eff_dc, meas, spike
 
     @staticmethod
     def _apply_sded_adaptive(x, eff_dc, alpha_dc, alpha_delta, delta):
+        """Adaptive threshold version with moving average compensation"""
         meas = np.abs(x - eff_dc)
         alpha_dc_red = alpha_dc/2
         alpha_delta_red = alpha_delta/2
+        
         if meas > delta:
             new_delta = np.sqrt(alpha_delta_red*meas**2 + (1-alpha_delta_red)*delta**2)
             spike = 1
-            new_eff_dc = alpha_dc_red * x + (1 - alpha_dc_red) * eff_dc
+            new_eff_dc = alpha_dc_red * (x + eff_dc)/2 + (1 - alpha_dc_red) * eff_dc
         else:
             new_delta = np.sqrt(alpha_delta*meas**2 + (1-alpha_delta)*delta**2)
             spike = 0
             new_eff_dc = alpha_dc * x + (1 - alpha_dc) * eff_dc
+            
         return new_eff_dc, new_delta, meas, spike

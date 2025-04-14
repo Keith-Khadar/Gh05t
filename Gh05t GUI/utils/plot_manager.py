@@ -188,8 +188,8 @@ class PlotManager:
         else:
             self.x_window.append(t[-1])
 
-        if len(self.x_window) > max_window_size * 250:
-            self.x_window = self.x_window[-int(max_window_size * 250):]
+        if len(self.x_window) > max_window_size * self.sampling_rate:
+            self.x_window = self.x_window[-int(max_window_size * self.sampling_rate):]
 
         window_start = self.x_window[0]
         window_end = self.x_window[-1]
@@ -387,6 +387,7 @@ class PlotManager:
 
     def real_time_fft(self, marray, sampling_rate, polar=False, ax=None):
         """Compute and plot real-time FFT with proper axis handling"""
+        marray = marray[:8, :]
         if isinstance(marray, list):
             marray = np.array(marray)
         
@@ -441,7 +442,7 @@ class PlotManager:
             
             ax.set_xlim(0.1, 80)
             max_mag = np.max(magnitudes) if magnitudes.size > 0 else 1
-            ax.set_ylim(0, 20)
+            ax.set_ylim(0, 100)
             ax.grid(True)
             ax.set_xlabel('Frequency (Hz)')
             ax.set_ylabel('Magnitude (µV²/Hz)')
@@ -609,14 +610,14 @@ class PlotManager:
             self.stackplot(data[:, :self.n_plot], seconds=time[-1], ylabels=self.channel_names, sampling_rate=self.sampling_rate)
         elif plot_type == "Polar FFT":
             if self.ble_reading or self.web_socket:
-                self.real_time_fft(self.data_rt, sampling_rate=250, polar=True)
+                self.real_time_fft(self.data_rt, sampling_rate=self.sampling_rate, polar=True)
                 self.start_fft_animation()
             else:
                 self.plot_fft(data[:, :self.n_plot], polar=True)
             self.animf_show = True
         elif plot_type == "FFT":
             if self.ble_reading or self.web_socket:
-                self.real_time_fft(self.data_rt, sampling_rate=250, polar=False)
+                self.real_time_fft(self.data_rt, sampling_rate=self.sampling_rate, polar=False)
                 self.start_fft_animation()
             else:
                 self.plot_fft(data[:, :self.n_plot], polar=False)
@@ -923,11 +924,11 @@ class PlotManager:
         if self.plot_type == "Polar FFT":
             if not hasattr(self, 'fft_ax'):
                 self.setup_fft_plot(polar=True)
-            self.real_time_fft(fft_data, sampling_rate=250, polar=True, ax=self.fft_ax)
+            self.real_time_fft(fft_data, sampling_rate=self.sampling_rate, polar=True, ax=self.fft_ax)
         else:
             if not hasattr(self, 'fft_ax'):
                 self.setup_fft_plot(polar=False)
-            self.real_time_fft(fft_data, sampling_rate=250, polar=False, ax=self.fft_ax)
+            self.real_time_fft(fft_data, sampling_rate=self.sampling_rate, polar=False, ax=self.fft_ax)
 
         return self.fft_ax.lines + self.fft_ax.collections
     

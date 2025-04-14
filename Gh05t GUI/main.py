@@ -4,12 +4,9 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QLabel, QFileDialog, 
     QStatusBar, QMenu, QAction, QGridLayout, QSplitter, QShortcut
 )
-from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent, QCoreApplication
+from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent, QCoreApplication, QThread
 from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase, QKeySequence
 import numpy as np
-import websockets
-import asyncio
-import json
 from threading import Thread
 from utils import PlotManager, EEGWebSocket, WebSocketServer, load_file, export_data_from_import, BLEWorker, SignalProcessingWindow, FileHandler
 
@@ -21,6 +18,8 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("EEG Data Visualizer")
         self.setGeometry(100, 100, 1200, 800)
         self.setMinimumSize(800, 600)
+
+        font_family = "Arial"
 
         font_id = QFontDatabase.addApplicationFont("resources\FuturisticYourself.ttf")
         if font_id == -1:
@@ -268,6 +267,7 @@ class MainWindow(QMainWindow):
         self.apply_model = False
         self.default_model = 0
         self.labeled_data = False
+        self.data_buffer = None
 
         # websocket api for labels
         self.ws_server = WebSocketServer(4242)
@@ -304,6 +304,7 @@ class MainWindow(QMainWindow):
             self.clear_layout(self.row3_layout)
 
             self.real_time = PlotManager(self.row3)
+            self.real_time.sampling_rate = 500
             self.real_time.web_socket = True
             self.row3_layout.addWidget(self.real_time.canvas)
             row_splitter = QSplitter(Qt.Horizontal)
@@ -337,8 +338,12 @@ class MainWindow(QMainWindow):
                 
             self.status_bar.showMessage("Connecting to BLE device...")
             self.ble_worker = BLEWorker()
+            self.ble_thread = QThread()
             self.ble_worker.data_received.connect(self.handle_real_time)
+            self.ble_worker.moveToThread(self.ble_thread)
             self.ble_worker.start()
+
+            self.play_button.setText("Stop Data Stream")
 
             self.ble_worker.status_update_signal.connect(self.update_status_bar)
             self.ble_worker.connection_failed_signal.connect(self.handle_connection_failed)
@@ -372,8 +377,10 @@ class MainWindow(QMainWindow):
         :param ble_data: The incoming data."""
         if data is None:
             return
-
+        
         new_data = np.array(data).reshape((8, 1)) 
+        if self.websocket_reading:
+            new_data = self.data
         self.data = new_data
         self.time = timestamp
         timestamp_s = timestamp / 1000.0
@@ -384,32 +391,43 @@ class MainWindow(QMainWindow):
             marray_volt = (new_data / adc_max_value) * 5  # Convert to volts
             new_data = marray_volt * 1000  # Convert to millivolts
         elif self.websocket_reading:
-            adc_max_value = 4095  # 2^12 - 1 for unsigned 12-bit
-            marray_volt = (new_data / adc_max_value) * 5  # Convert to volts
-            new_data = marray_volt * 1000  # Convert to millivolts
+            new_data = data
+            # adc_max_value = 4095  # 2^12 - 1 for unsigned 12-bit
+            # marray_volt = (new_data / adc_max_value) * 5  # Convert to volts
+            # new_data = marray_volt * 1000  # Convert to millivolts
         self.data = new_data
+
+        previous_buffer = self.data_buffer.copy() if self.data_buffer is not None else None
+        # store 500 data points for running average -> signal processing
+        if (self.data_buffer is None) or (len(self.data_buffer) == 0):
+            self.data_buffer = np.tile(new_data, (1, 500))
+        elif self.data_buffer.shape[1] >= 500:
+            self.data_buffer = np.roll(self.data_buffer, -1, axis=1)
+            self.data_buffer[:, -1] = new_data[:, 0]
+        else:
+            self.data_buffer = np.hstack((self.data_buffer, new_data))
 
         # Apply filters
         if self.filter_type is not None:
             for channel in range(8):
                 sample = new_data[channel, 0]
+                if sample == 0:
+                    continue
                 if self.filter_type in ["Low Pass", "High Pass"]:
-                    cutoff = self.signal_processing_window.freq_range[0]
-                    filtered_sample = self.signal_processing_window.butter_filter(np.array([sample]), fs=self.sampling_rate, cutoff=[cutoff], btype=self.filter_type.lower().replace(" ", ""), rt=1)
+                    cutoff = self.signal_processing_window.freq_range
+                    filtered_sample = self.signal_processing_window.butter_filter(data=np.array([sample]), fs=self.sampling_rate, cutoff=cutoff, btype=self.filter_type.lower().replace(" ", ""), rt=1, channel=channel)
                 elif self.filter_type == "Band Pass":
                     freq_range = self.signal_processing_window.freq_range
-                    filtered_sample = self.signal_processing_window.butter_filter(np.array([sample]), fs=self.sampling_rate, cutoff=freq_range, btype='band', rt=1)
+                    filtered_sample = self.signal_processing_window.butter_filter(data=np.array([sample]), fs=self.sampling_rate, cutoff=freq_range, btype='band', rt=1, channel=channel)
                 elif self.filter_type == "Notch":
                     notch_freq = self.signal_processing_window.freq_range[0]
-                    filtered_sample = self.signal_processing_window.notch_filter(np.array([sample]), freq=notch_freq, fs=self.sampling_rate, rt=1)
-                else:
-                    filtered_sample = sample
-                filtered_data[channel, 0] = filtered_sample
+                    filtered_sample = self.signal_processing_window.notch_filter(data=np.array([sample]), freq=notch_freq, fs=self.sampling_rate, rt=1, channel=channel)
+                filtered_data[channel, 0] = filtered_sample[0]
             self.data = filtered_data
 
-        if self.apply_model:
-            if self.default_model:
-                spikes, cleaned_data = self.signal_processing_window.detect_emg(self.data)
+        if self.apply_model and self.default_model:
+            if previous_buffer is not None and previous_buffer.shape[1] >= 500:
+                spikes, _ = self.signal_processing_window.detect_emg(new_data, previous_buffer)
                 if np.any(spikes):
                     self.label = 1
 
@@ -431,9 +449,11 @@ class MainWindow(QMainWindow):
         else:
             labeled_data = self.data
             self.file_handler.add_data(timestamp, self.data)
-            self.real_time.labeling_mode = False
+            if self.real_time is not None:
+                self.real_time.labeling_mode = False
 
-        self.real_time.handle_real_time_data(labeled_data, timestamp)
+        if self.real_time is not None:
+            self.real_time.handle_real_time_data(labeled_data, timestamp)
         for plot_type in list(self.active_plots.keys()):
             real_fft, splitter = self.active_plots[plot_type]
             real_fft.handle_real_time_data(self.data, timestamp)
@@ -446,7 +466,7 @@ class MainWindow(QMainWindow):
 
     def play_data_stream(self):
         """Start the animation for all applicable plots."""
-        if len(self.active_plots) == 0 and not self.ble_reading:
+        if len(self.active_plots) == 0 and not (self.ble_reading or self.websocket_reading):
             self.statusBar().showMessage("No plots to animate!")
             return
 
@@ -469,24 +489,24 @@ class MainWindow(QMainWindow):
                 plot_mgr.stop_animation()
             self.play_button.setText("Start Data Stream")
             self.play_animation = False
-        elif self.play_rt_animation and self.ble_reading:
+        elif self.play_rt_animation and (self.ble_reading or self.websocket_reading):
             self.statusBar().showMessage("Stopping real-time data stream...")
             self.play_button.setText("Start Data Stream")
             self.real_time.stop_animation()
             for plot_mgr, _ in self.active_plots.values():
-                    plot_mgr.stop_animation()
+                plot_mgr.stop_animation()
             self.play_rt_animation = False
             self.paused_rt = True
-        elif self.paused_rt and self.ble_reading:
+        elif self.paused_rt and (self.ble_reading or self.websocket_reading):
             self.statusBar().showMessage("Resuming real-time data stream...")
             self.play_button.setText("Stop Data Stream")
             self.real_time.start_rt_animation()
             for plot_mgr, _ in self.active_plots.values():
-                    plot_mgr.start_fft_animation()
-                    plot_mgr.start_topo_animation()
+                plot_mgr.start_fft_animation()
+                plot_mgr.start_topo_animation()
             self.paused_rt = False
         else:
-            self.statusBar().showMessage("No data loaded!")
+            self.statusBar().showMessage("No data loaded!") 
 
     def export_data_to_file(self):
         """Export the loaded data to a CSV file."""
@@ -536,7 +556,10 @@ class MainWindow(QMainWindow):
                 self.signal_processing_window.filtered_data = None
                 self.filter_type = filter_type
         else:
-            self.filter_type = filter_type
+            if filter_type == "None":
+                self.filter_type = None
+            else:   
+                self.filter_type = filter_type
 
     def pressL(self):
         """Detect L presses."""
@@ -637,6 +660,10 @@ class MainWindow(QMainWindow):
             plot_mgr.animf.event_source.stop()
             plot_mgr.animf = None
 
+        if hasattr(plot_mgr, 'anim_topography') and plot_mgr.anim_topography is not None:
+            plot_mgr.anim_topography.event_source.stop()
+            plot_mgr.anim_topography = None
+
         plot_mgr.canvas.setParent(None)
         plot_mgr.canvas.deleteLater()
         
@@ -665,6 +692,16 @@ class MainWindow(QMainWindow):
         """Reset the application to its initial state"""
         for plot_type in list(self.active_plots.keys()):
             self.remove_plot(plot_type)
+
+        if self.real_time is not None:
+            if hasattr(self.real_time, 'animt') and self.real_time.animt is not None:
+                self.real_time.animt.event_source.stop()
+                self.real_time.animt = None
+
+            self.real_time.canvas.setParent(None)
+            self.real_time.canvas.deleteLater()
+            del self.real_time
+            self.real_time = None
         
         self.data = np.empty((0, 3))
         self.time = np.empty((0, 1))
@@ -713,20 +750,11 @@ class MainWindow(QMainWindow):
 
         if hasattr(self, 'ble_worker'):
             self.ble_worker.disconnect()
-            del self.ble_worker
+            self.ble_thread.quit()
+            self.ble_thread.wait(1000)
         if hasattr(self, 'web_socket'):
             self.web_socket.stop()
             del self.web_socket
-
-        if self.ble_reading:
-            if hasattr(self.real_time, 'animt') and self.real_time.animt is not None:
-                self.real_time.animt.event_source.stop()
-                self.real_time.animt = None
-
-            self.real_time.canvas.setParent(None)
-            self.real_time.canvas.deleteLater()
-            
-            del self.real_time
         
         # Reset plot checkboxes
         for action in self.plot_actions.values():
@@ -752,8 +780,12 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         """Close the window and disconnect the BLE worker."""
+        self.ws_server.stop_server()
+
         if self.ble_reading is None:
             self.ble_worker.disconnect()
+            self.ble_thread.quit()
+            self.ble_thread.wait(1000)
         
         bin_file = "data/raw_data.bin"
         self.file_handler.stop()
@@ -763,7 +795,7 @@ class MainWindow(QMainWindow):
         settings = QSettings("GH05T", "SignalProcessing")
         settings.clear()
 
-        super().close()
+        self.close()
         QCoreApplication.instance().quit()
         print('Window closed')
 

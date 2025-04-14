@@ -1,5 +1,6 @@
 import socket
 import time
+from datetime import datetime
 import asyncio
 import json
 import numpy as np
@@ -8,6 +9,7 @@ from threading import Thread
 import struct
 import logging
 import websockets
+import msgpack
 
 HOST = "224.1.1.1"  # Replace with your Pico's IP address
 PORT = 5005
@@ -16,6 +18,14 @@ SAMPLES_PER_PACKET = 8
 
 logging.basicConfig(level=logging.INFO)
 web_logger = logging.getLogger(__name__)
+
+data_buffer = {
+    "timestamps": [],
+    "values": {f"CH{i}": [] for i in range(8)}
+}
+
+max_points = 2000
+start_timestamp = time.perf_counter()
 
 # HANDLE INCOMING EEG DATA FROM RPI PICO DEVICE
 class EEGWebSocket(QThread):
@@ -42,7 +52,6 @@ class EEGWebSocket(QThread):
         mreq = struct.pack("4sl", socket.inet_aton(HOST), socket.INADDR_ANY)
         self.socket.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-
         # self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # print(f"Connecting to {HOST}:{PORT}")
         # self.status_update_signal.emit(f"Connecting to {HOST}:{PORT}")
@@ -58,80 +67,29 @@ class EEGWebSocket(QThread):
     async def disconnect_client(self):
         await self.socket.close()
 
+    def get_time_elapsed(self):
+        return int((time.perf_counter() - start_timestamp) * 1000)
+
     def handle_packets(self):
-        # print("entered")
-        # try:
-        #     raw_data, addr = self.socket.recvfrom(1024)
-        #     print(f"Received data from {addr}: {raw_data}")
-        #     decoded_data = raw_data.decode("utf-8")
-        #     print(f"Decoded Data: {decoded_data}")
-        # except Exception as e:
-        #     print(f"Error receiving data: {e}")
-        
-        # try:
-            # raw_data = b""
-
-            # while len(self.data_buffer) < 4:  # Keep receiving until we have enough data
-            #     raw_data, addr = self.socket.recvfrom(4)
-            #     # raw_data = self.socket.recv(18)
-            #     if not raw_data:
-            #         print("Connection closed by the server")
-            #         return
-
-            #     self.data_buffer.extend(raw_data)
-
-            # if len(self.data_buffer) >= 32:
-            #     packet = self.data_buffer[:32]  # Take first 36 bytes
-            #     self.data_buffer = self.data_buffer[32:]  # Remove processed bytes
-
-            #     if len(packet) >= 36:  # Ensure we have enough bytes to unpack
-            #         self.timestamp = int(time.time() * 1000) # milliseconds
-            #         self.channel_data = list(struct.unpack('<8i', packet[4:36]))
-            #         print(packet)
-            #         self.data_received.emit(self.timestamp, self.channel_data)
-            
-        # while len(self.data_buffer) < 36:  # Keep receiving until we have enough data
-        #     raw_data, addr = self.socket.recvfrom(1024)
-        #     sensor_data = json.loads(raw_data.decode())
-        #     # print(type(sensor_data["CH1"]))
-        #     # raw_data = self.socket.recv(18)
-        #     if not raw_data:
-        #         print("Connection closed by the server")
-        #         return
-
-        #     self.data_buffer.extend(sensor_data)
         raw_data, addr = self.socket.recvfrom(1024)
         sensor_data = json.loads(raw_data.decode())
 
-        if len(self.sensor_data) >= 34:
-            # sorted_data = [sensor_data[key] for key in sorted(sensor_data.keys(), key=lambda x: int(x[2:]) if x[2:].isdigit() else float('inf'))]
-            
-            channel_data = np.zeros(8)  # Initialize a list with 8 elements
+        self.timestamp = self.get_time_elapsed()
+        channel_data = []
+        for i in range(8):
+            channel_key = f"CH{i}"
+            if channel_key in sensor_data:
+                value = sensor_data[channel_key]
 
-            for i in range(8):  
-                channel_key = f"CH{i}" 
-                channel_data[i] = sensor_data[channel_key] 
+                data_buffer["timestamps"].append(self.timestamp)
+                data_buffer["values"][channel_key].append(value)
 
-            # packet = self.data_buffer[:36]  # Take first 36 bytes
-            # self.data_buffer = self.data_buffer[36:]  # Remove processed bytes
-
-            self.timestamp = time.time()
-            # self.channel_data = list(struct.unpack('<8i', packet[4:36]))
-            # print(packet)
-            self.data_received.emit(self.timestamp, channel_data)
-
-            # if len(packet) >= 36:  # Ensure we have enough bytes to unpack
-            #     self.timestamp = struct.unpack('<I', packet[:4])[0]
-            #     self.channel_data = list(struct.unpack('<8i', packet[4:36]))
-            #     print(packet)
-            #     self.data_received.emit(self.timestamp, self.channel_data)
-
-        # except socket.timeout:
-        #     print("timeout")
-        #     pass
-        # except Exception as e:
-        #     print(f"Error: {e}")
-        #     self.connection_failed_signal.emit(f"An error occurred: {e}")
+                if len(data_buffer["timestamps"]) > max_points:
+                    data_buffer["timestamps"].pop(0)
+                    for key in data_buffer["values"]:
+                        data_buffer["values"][key].pop(0)
+            channel_data.append(value)
+        self.data_received.emit(self.timestamp, channel_data)
 
     def run(self):
         """The main loop for the QThread, sets up a new asyncio event loop
@@ -150,60 +108,69 @@ class WebSocketServer(QObject):
         self.server = None
         self.loop = None
         self.thread = None
+        self.running = False
         self.start_server()
 
     def start_server(self):
-        """Start WebSocket server in a dedicated thread"""
+        """Start WebSocket server with proper event loop handling"""
         def run_server():
+            # Create new event loop for this thread
             self.loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self.loop)
-
+            
+            # Define async main server task
             async def server_main():
-                async with websockets.serve(
+                self.server = await websockets.serve(
                     self.handle_connection,
                     "0.0.0.0",
                     self.port
-                ):
-                    await asyncio.Future()
+                )
+                self.running = True
+                await self.server.start_serving()
 
-            self.loop.run_until_complete(server_main())
+            # Run the server until stopped
+            try:
+                self.loop.run_until_complete(server_main())
+                self.loop.run_forever()
+            finally:
+                self.running = False
 
+        # Start the server in a dedicated daemon thread
         self.thread = Thread(target=run_server, daemon=True)
         self.thread.start()
 
     async def handle_connection(self, websocket, path):
-        """Handle new WebSocket connections"""
+        """Handle client connections"""
         self.clients.add(websocket)
         try:
             async for message in websocket:
-                pass
+                pass  # Handle incoming messages if needed
+        except websockets.exceptions.ConnectionClosed:
+            pass
         finally:
             self.clients.remove(websocket)
 
     def send_data(self, data):
-        """Thread-safe data broadcasting"""
-        if not self.clients:
+        """Thread-safe data broadcast"""
+        if not self.running or not self.clients:
             return
 
-        async def send_all():
-            message = json.dumps(data)
-            await asyncio.wait([client.send(message) for client in self.clients])
+        async def _send():
+            try:
+                message = json.dumps(data)
+                await asyncio.gather(
+                    *[client.send(message) for client in self.clients.copy()]
+                )
+            except Exception as e:
+                print(f"WebSocket send error: {e}")
 
-        asyncio.run_coroutine_threadsafe(send_all(), self.loop)
+        asyncio.run_coroutine_threadsafe(_send(), self.loop)
 
     def stop_server(self):
-        """Cleanly shutdown the WebSocket server"""
-        if self.loop and self.loop.is_running():
-            # Cancel all tasks before stopping the loop
-            tasks = [task for task in asyncio.all_tasks(self.loop) if not task.done()]
-            for task in tasks:
-                task.cancel()
-                try:
-                    self.loop.run_until_complete(task)
-                except asyncio.CancelledError:
-                    pass
-            
-            self.loop.call_soon_threadsafe(self.loop.stop)  # Stop the event loop safely
-
-        if self.thread and self.thread.is_alive():
-            self.thread.join()  # Ensure the server thread is fully closed
+        """Clean shutdown procedure"""
+        if self.loop and self.running:
+            # Close server and clients
+            self.loop.call_soon_threadsafe(self.server.close)
+            self.loop.call_soon_threadsafe(self.loop.stop)
+            self.thread.join(timeout=1)
+            self.running = False
