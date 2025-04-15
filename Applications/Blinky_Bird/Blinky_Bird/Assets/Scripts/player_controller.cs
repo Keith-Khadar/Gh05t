@@ -26,7 +26,7 @@ public class player_controller : MonoBehaviour
 
     private void Start()
     {
-        ws = new WebSocket("ws://10.78.4.19:4242");
+        ws = new WebSocket(ip_address.URL);
         ws.Connect();
         ws.OnMessage += (sender, e) =>
         {
