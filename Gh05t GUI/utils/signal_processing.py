@@ -163,10 +163,11 @@ class SignalProcessingWindow(QDialog):
 
         self.model_buffer = []
         self.buffer_size = 500
+        self.max_moving_avg = 0
 
-        self.alpha = 0.01
-        self.alpha_delta = 0.01 # adaptive change
-        self.delta_init = 100 # threshold
+        self.alpha = 0.05
+        self.alpha_delta = 0.05 # adaptive change
+        self.delta_init = 1500 # threshold
         self.use_adaptive = True 
         self.eff_dc = [0.0] * 8
         self.delta = [self.delta_init] * 8
@@ -380,6 +381,7 @@ class SignalProcessingWindow(QDialog):
 
         self.filtered_data = settings.value("filtered_data", None)
         self.original_data = settings.value("original_data", None)
+        self.max_moving_avg = settings.value("max_moving_avg", 0)
 
         self.butter_states = settings.value("butter_states", {})
         self.notch_states = settings.value("notch_states", {})
@@ -407,6 +409,7 @@ class SignalProcessingWindow(QDialog):
         settings.setValue("rt", self.rt)
         settings.setValue("butter_states", self.butter_states)
         settings.setValue("notch_states", self.notch_states)
+        settings.setValue("max_moving_avg", self.max_moving_avg)
 
     # model for emg
     def detect_emg(self, raw_data, buffer):
@@ -419,6 +422,9 @@ class SignalProcessingWindow(QDialog):
 
         # Calculate moving average for each channel
         moving_avg = np.mean(buffer, axis=1, keepdims=True)
+        # if self.max_moving_avg < moving_avg[0]:
+        #     self.max_moving_avg = moving_avg[0]
+
         deviated_sample = raw_data - moving_avg
 
         for ch in range(8):

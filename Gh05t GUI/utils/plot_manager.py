@@ -171,6 +171,11 @@ class PlotManager:
         self.canvas.setStyleSheet("background:#85a0bb;")
         ax.set_facecolor((0, 0, 0, 0))
 
+        if self.web_socket:
+            self.sampling_rate = 33
+        else:
+            self.sampling_rate = 250
+
         self.canvas.draw()
 
     def real_time_stackplot(self, marray, seconds=None, ylabels=None, ax=None):

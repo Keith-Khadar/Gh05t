@@ -25,7 +25,7 @@ data_buffer = {
 }
 
 max_points = 2000
-start_timestamp = time.perf_counter()
+start_timestamp = time.perf_counter_ns()
 
 # HANDLE INCOMING EEG DATA FROM RPI PICO DEVICE
 class EEGWebSocket(QThread):
@@ -62,13 +62,13 @@ class EEGWebSocket(QThread):
 
         while True:
             self.handle_packets()
-            await asyncio.sleep(0.1)
+            # await asyncio.sleep(0.00001)
 
     async def disconnect_client(self):
         await self.socket.close()
 
     def get_time_elapsed(self):
-        return int((time.perf_counter() - start_timestamp) * 1000)
+        return int((time.perf_counter_ns() - start_timestamp)/1000000)
 
     def handle_packets(self):
         raw_data, addr = self.socket.recvfrom(1024)
@@ -78,16 +78,16 @@ class EEGWebSocket(QThread):
         channel_data = []
         for i in range(8):
             channel_key = f"CH{i}"
+            # data_buffer["timestamps"].append(self.timestamp)
             if channel_key in sensor_data:
                 value = sensor_data[channel_key]
 
-                data_buffer["timestamps"].append(self.timestamp)
-                data_buffer["values"][channel_key].append(value)
+                # data_buffer["values"][channel_key].append(value)
 
-                if len(data_buffer["timestamps"]) > max_points:
-                    data_buffer["timestamps"].pop(0)
-                    for key in data_buffer["values"]:
-                        data_buffer["values"][key].pop(0)
+                # if len(data_buffer["timestamps"]) > max_points:
+                #     data_buffer["timestamps"].pop(0)
+                #     for key in data_buffer["values"]:
+                #         data_buffer["values"][key].pop(0)
             channel_data.append(value)
         self.data_received.emit(self.timestamp, channel_data)
 
@@ -139,12 +139,12 @@ class WebSocketServer(QObject):
         self.thread = Thread(target=run_server, daemon=True)
         self.thread.start()
 
-    async def handle_connection(self, websocket, path):
+    async def handle_connection(self, websocket):
         """Handle client connections"""
         self.clients.add(websocket)
         try:
             async for message in websocket:
-                pass  # Handle incoming messages if needed
+                print(f"Received message: {message}")
         except websockets.exceptions.ConnectionClosed:
             pass
         finally:
@@ -152,8 +152,8 @@ class WebSocketServer(QObject):
 
     def send_data(self, data):
         """Thread-safe data broadcast"""
-        if not self.running or not self.clients:
-            return
+        # if not self.running or not self.clients:
+        #     return
 
         async def _send():
             try:
