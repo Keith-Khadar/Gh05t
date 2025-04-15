@@ -33,6 +33,11 @@ Run the main script to start the GUI. The python script will scan for bluetooth 
 python main.py
 ```
 
+#### 3*. (Optional) Connect to WebSocket Host
+The GUI automatically opens the WebSocket at start up. It only broadcasts labels, which requires the user to enable the manual or ML labeling in order to start broadcasting the information. The WebSocket URL is shown to the user next to the Data Input button (the IP4 Addr of the local machine with the PORT number).
+
+The WebSocket broadcasts the labels for the benefit of external applications. For more information, refer to ```Applications``` folder in the repository.
+
 ## Code Architecture
 
 - **`main.py`**: Main script for the GUI.
