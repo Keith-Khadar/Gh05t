@@ -7,8 +7,22 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QTimer, QSettings, QEvent, QCoreApplication, QThread
 from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase, QKeySequence
 import numpy as np
+import socket
+import asyncio
 from threading import Thread
 from utils import PlotManager, EEGWebSocket, WebSocketServer, load_file, export_data_from_import, BLEWorker, SignalProcessingWindow, FileHandler
+
+def get_local_ip():
+    # Connect to an external host to find the local IP
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        # This doesn't have to be reachable
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception as e:
+        return f"Error: {e}"
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -93,7 +107,17 @@ class MainWindow(QMainWindow):
         title_layout.addWidget(self.title_label)
         title_layout.addStretch(1)
 
+        self.IP_addr_label = QLabel("IP: ")
+        self.IP_addr_label.setStyleSheet("color: white;")
+        self.IP_addr_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+
+        self.IP = QLabel(get_local_ip())
+        self.IP.setStyleSheet("color: white;")
+        self.IP.setAlignment(Qt.AlignRight)
+
         row1.addWidget(self.data_input_button)
+        row1.addWidget(self.IP_addr_label)
+        row1.addWidget(self.IP)
         row1.addStretch(1)
         row1.addLayout(title_layout)
 
@@ -392,6 +416,8 @@ class MainWindow(QMainWindow):
             new_data = marray_volt * 1000  # Convert to millivolts
         elif self.websocket_reading:
             new_data = data
+            new_data = np.array(new_data).reshape((8, 1))
+            new_data[1:] = 0
             # adc_max_value = 4095  # 2^12 - 1 for unsigned 12-bit
             # marray_volt = (new_data / adc_max_value) * 5  # Convert to volts
             # new_data = marray_volt * 1000  # Convert to millivolts
@@ -443,7 +469,7 @@ class MainWindow(QMainWindow):
 
             # send labels
             ws_data = {
-                "label": int(self.label) if hasattr(self, 'label') else 0,
+                "label": int(label),
             }
             self.ws_server.send_data(ws_data)
         else:
@@ -800,6 +826,7 @@ class MainWindow(QMainWindow):
         print('Window closed')
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
