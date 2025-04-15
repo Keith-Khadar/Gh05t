@@ -28,18 +28,13 @@ We provide various levels to users depending on cost, precision, and usability:
 [^2]: Refer to [Balanced_Performance\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Balanced_Performance) for more information on the setup and specifics for the system.
 [^3]: Refer to [Low_Cost\README.md](https://github.com/Keith-Khadar/Gh05t/tree/main/Low_Cost) for more information on the setup and specifics for the system.
 
-## Completed Work/In Progress for Milestone Release Candidate
+## Completed Work/In Progress for Milestone Production Release
 
--   **Labeling Data from High Performance Pipeline (ESP32 + ADS1299)**: The labelling of the incoming EEG data for training machine learning pipeline was completed.
--   **3D modelling of protective case for High Performance Pipeline (ESP32 + ADS1299)** A 3D model of a protective case was designed to safeguard the balanced-performance board from physical damage, environmental factors, and overheating.
--   **Working Balanced Performance Pipeline (ADS1299 PCB)**: The communication between the electrodes, ADS1299 PCB, ESP32, and GUI was made successful after the alpha test plan. Alpha Waves, 8Hz-10Hz, were successfully detected.
-    -   Work in progress on registering eye blinks from the system.
--   **Working Low Cost Circuit/Pipeline**: The low cost was fully connected to the GH05T GUI and is able to read incoming data through the WebSocket.
-    -   Work in progress on testing the analog mux on 8 channel data and receiving significant EEG signals. Additionally, a PCB design is being created.
--   **Optimizing Real Time Reading on the GUI**: The GUI is able to read in real time with minimal frame lag in the plotting features. Latency is prevalent in between the ESP32 SPI sampling and the GUI processing of about 10-15 seconds. Topography map visuals were added for easier viewing of the electrode locations on the head. Signal processing such as filtering (low, high, band, and notch) were added with the ability to label data with 0 or 1. Lastly, the ability to use a SDED or NLSM model to label data based on emg thresholds (eye blinks) were added as well.
-    -   Work in progress in incorporating more variance in the SDED and/or NLSM model.
--   **Second Design Version ADS1299 PCB Design**: A new iteration of the custom ADS1299 PCB was designed and assembeled to decrease the size compared to the first version and to add headers to connect the microcontroller directly resulting in a smaller and more stable package.
-    -   Work in progress on getting the correct timing and interfacing.
+-   **Working Balanced Performance Pipeline (ADS1299 Breakout PCB)**: Eye blinks were detected successfully in the FFT and Time Series plots but was unable to receive consistent and robust results after each trial.
+    -   Work in progress of doing trial and error to reproduce results.
+-   **Housing Design for Balanced Performance Board (Breakout PCB)**: A CAD design of a housing unit for the ADS1299 Breakout PCB was completed.
+-   **Optimizing Real Time Reading on the GUI**: Since eye blinks were successfully shown in the time series, the SDED, with the calibration of the delta and alpha variables, was able to successfully label with minimal latency the sample positions where the blinking occurred.
+-   **EEG Game Application**: In order to expand the application of using the EEG data and detecting events like eye blinking, a VR and simple blinking game was created. A WebSocket host was created in the GUI and successfully broadcasts the SDED labels to any client to act as a controller for a game.
 -   **Signal Preprocessing** : The EEG signal preprocessing pipeline is fully implemented, ensuring artifact removal, filtering, and independent component extraction before further processing. FastICA, InfoMax, NLMS and VSS-APA are implemented to extract information components from raw EEG signals in real-time.
 -   **Event Detection/Prediction Model**: The EEG-based event detection pipeline and machine learning models have been developed to analyze real-time brain activity and infer motor function. NLMS, Batch-Wiener Filter and VSS-APA have been implemeted for predictions - Statistical Deviation Event Detection Model and Information Theoretic Learning Point Process Detection Models have been implemented for more sophisticed event flagging.
 
@@ -112,7 +107,7 @@ We provide various levels to users depending on cost, precision, and usability:
 
 ## Known Bugs
 
--   **DFRobot Firebeetle ESP32 SPI reading**: The ESP32 requires repeated plugging in and out until it properly read the registers in the ADS1299. We suspect this could be a power issue which will be fixed in the upcoming new PCB design.
+- The Balanced Performance Board ADS1299 completely stopped working after trying to fit the casing to the hardware. This was an unexpected issue that is not able to be understood. Possible issues that could have occurred for the chip to completely stop working is somehow the chip received a surge of power that could have damaged it. 
 
 ## Difficulties/Challenges
 
