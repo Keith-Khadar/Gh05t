@@ -10,7 +10,7 @@ We provide various levels to users depending on cost, precision, and usability:
 | --------------------------- | ----------------------------------------- | --------------------------------------------- | --------------------------------------------- |
 | **Number of Channels**      | 8\*                                       | 8\*                                           | 8                                             |
 | **Resolution**              | 24-bit                                    | 24-bit                                        | 12-bit                                        |
-| **Lowest Sampling Rate**    | 250 Hz                                    | 250 Hz                                        | <33 Hz                                        |
+| **Typical Sampling Rate**   | <250 Hz                                   | 250 Hz                                        | <33 Hz                                        |
 | **ADC Chip**                | ADS1299-IPAG                              | ADS1299-IPAG                                  | Internal RPi Pico ADC                         |
 | **Board**                   | EEG Development Board with ESP32-S3       | Custom PCB                                    | Custom breadboard/featherboard circuit        |
 | **Microcontroller**         | XIAO ESP32-C6                             | DFRobot Firebeetle ESP32 32D                  | Raspberry Pi Pico W                           |
