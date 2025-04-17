@@ -9,14 +9,13 @@ from PyQt5.QtGui import QFont, QPixmap, QColor, QPalette, QFontDatabase, QKeySeq
 import numpy as np
 import socket
 import asyncio
+import time
 from threading import Thread
 from utils import PlotManager, EEGWebSocket, WebSocketServer, load_file, export_data_from_import, BLEWorker, SignalProcessingWindow, FileHandler
 
 def get_local_ip():
-    # Connect to an external host to find the local IP
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # This doesn't have to be reachable
         s.connect(("8.8.8.8", 80))
         ip = s.getsockname()[0]
         s.close()
@@ -107,13 +106,13 @@ class MainWindow(QMainWindow):
         title_layout.addWidget(self.title_label)
         title_layout.addStretch(1)
 
-        self.IP_addr_label = QLabel("IP: ")
+        self.IP_addr_label = QLabel("WebSocket URL: ")
         self.IP_addr_label.setStyleSheet("color: white;")
         self.IP_addr_label.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-        self.IP = QLabel(get_local_ip())
+        self.IP = QLabel("ws://" + get_local_ip() + ":4242")
         self.IP.setStyleSheet("color: white;")
-        self.IP.setAlignment(Qt.AlignRight)
+        self.IP.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
         row1.addWidget(self.data_input_button)
         row1.addWidget(self.IP_addr_label)
@@ -293,6 +292,8 @@ class MainWindow(QMainWindow):
         self.labeled_data = False
         self.data_buffer = None
 
+        self.start_time_label = 0
+
         # websocket api for labels
         self.ws_server = WebSocketServer(4242)
 
@@ -427,10 +428,7 @@ class MainWindow(QMainWindow):
         # store 500 data points for running average -> signal processing
         if (self.data_buffer is None) or (len(self.data_buffer) == 0):
             self.data_buffer = np.tile(new_data, (1, 500))
-        elif self.data_buffer.shape[1] >= 500:
-            self.data_buffer = np.roll(self.data_buffer, -1, axis=1)
-            self.data_buffer[:, -1] = new_data[:, 0]
-        else:
+        elif self.data_buffer.shape[1] < 500:
             self.data_buffer = np.hstack((self.data_buffer, new_data))
 
         # Apply filters
@@ -453,7 +451,11 @@ class MainWindow(QMainWindow):
 
         if self.apply_model and self.default_model:
             if previous_buffer is not None and previous_buffer.shape[1] >= 500:
-                spikes, _ = self.signal_processing_window.detect_emg(new_data, previous_buffer)
+                elapsed_time = time.time() - self.start_time_label
+                if elapsed_time > 5:
+                    spikes, _ = self.signal_processing_window.detect_emg(new_data, previous_buffer)
+                else:
+                    self.signal_processing_window.detect_emg(new_data, previous_buffer, self.label, rt='adaptive')
                 if np.any(spikes):
                     self.label = 1
 
@@ -607,6 +609,8 @@ class MainWindow(QMainWindow):
         self.default_model = int
         if not self.labeling_mode:
             self.labeling_mode = True
+
+        start_time_label = time.time()
 
         # if not (self.ble_reading or self.websocket_reading):
         #     if self.default_model:

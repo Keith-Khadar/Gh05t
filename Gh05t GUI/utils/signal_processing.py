@@ -163,12 +163,12 @@ class SignalProcessingWindow(QDialog):
 
         self.model_buffer = []
         self.buffer_size = 500
-        self.max_moving_avg = 0
+        self.max_raw = 0
 
-        self.alpha = 0.05
-        self.alpha_delta = 0.05 # adaptive change
-        self.delta_init = 1500 # threshold
-        self.use_adaptive = True 
+        self.alpha = 0.1
+        self.alpha_delta = 0.1 # adaptive change
+        self.delta_init = 1000 # threshold
+        self.use_adaptive = False 
         self.eff_dc = [0.0] * 8
         self.delta = [self.delta_init] * 8
 
@@ -340,10 +340,10 @@ class SignalProcessingWindow(QDialog):
         self.status_label.setText("Status: Labeling Mode Enabled" if self.labeling_mode else "Status: Labeling Mode Disabled")
         self.label_instruc.setVisible(self.labeling_mode)
 
-        self.no_model_label.setVisible(self.labeling_mode)
-        self.import_model_button.setVisible(not self.labeling_mode)
-        self.apply_ml_button.setVisible(not self.labeling_mode)
-        self.use_default_model_checkbox.setVisible(not self.labeling_mode)
+        # self.no_model_label.setVisible(self.labeling_mode)
+        # self.import_model_button.setVisible(not self.labeling_mode)
+        # self.apply_ml_button.setVisible(not self.labeling_mode)
+        # self.use_default_model_checkbox.setVisible(not self.labeling_mode)
 
         self.label_signal.emit()
 
@@ -381,7 +381,10 @@ class SignalProcessingWindow(QDialog):
 
         self.filtered_data = settings.value("filtered_data", None)
         self.original_data = settings.value("original_data", None)
-        self.max_moving_avg = settings.value("max_moving_avg", 0)
+        self.max_raw = settings.value("max_raw", 0)
+
+        # self.eff_dc = settings.value("eff_dc", [])
+        # self.delta = settings.value("delta", [])
 
         self.butter_states = settings.value("butter_states", {})
         self.notch_states = settings.value("notch_states", {})
@@ -409,10 +412,13 @@ class SignalProcessingWindow(QDialog):
         settings.setValue("rt", self.rt)
         settings.setValue("butter_states", self.butter_states)
         settings.setValue("notch_states", self.notch_states)
-        settings.setValue("max_moving_avg", self.max_moving_avg)
+        settings.setValue("max_raw", self.max_raw)
+        
+        # settings.setValue("eff_dc", self.eff_dc)
+        # settings.setValue("delta", self.delta)
 
     # model for emg
-    def detect_emg(self, raw_data, buffer):
+    def detect_emg(self, raw_data, buffer, label=None, mode=None):
         """
         Process data through EMG detection pipeline with moving average
         Returns: (spikes, filtered_data)
@@ -422,19 +428,24 @@ class SignalProcessingWindow(QDialog):
 
         # Calculate moving average for each channel
         moving_avg = np.mean(buffer, axis=1, keepdims=True)
-        # if self.max_moving_avg < moving_avg[0]:
-        #     self.max_moving_avg = moving_avg[0]
 
         deviated_sample = raw_data - moving_avg
+
+        if self.max_raw < deviated_sample[0]:
+            self.max_raw = deviated_sample[0]
+            print(self.max_raw)
 
         for ch in range(8):
             x = deviated_sample[ch, 0]
             
             if self.use_adaptive:
-                (self.eff_dc[ch], self.delta[ch], 
-                measurements[ch], spikes[ch]) = self._apply_sded_adaptive(
-                    x, self.eff_dc[ch], self.alpha, self.alpha_delta, self.delta[ch]
-                )
+                # (self.eff_dc[ch], self.delta[ch], 
+                # measurements[ch], spikes[ch]) = self._apply_sded_adaptive(
+                #     x, self.eff_dc[ch], self.alpha, self.alpha_delta, self.delta[ch]
+                # )
+
+                (self.eff_dc[ch], self.delta[ch], measurements[ch], spikes[ch]) = self.apply_sded_dual(
+                    x, self.eff_dc[ch], self.alpha[ch], self.alpha_delta[ch], self.delta[ch], 0, 1, 1, label, mode, 2, 19000)
             else:
                 (self.eff_dc[ch], measurements[ch], 
                 spikes[ch]) = self._apply_sded_fixed(
@@ -451,7 +462,9 @@ class SignalProcessingWindow(QDialog):
         
         if meas > delta:
             new_eff_dc = alpha_red * (x + eff_dc) / 2 + (1 - alpha_red) * eff_dc
-            spike = 1
+            if x > 5000:
+                spike = 1
+            else: spike = 0
         else:
             new_eff_dc = alpha * x + (1 - alpha) * eff_dc
             spike = 0
@@ -466,12 +479,125 @@ class SignalProcessingWindow(QDialog):
         alpha_delta_red = alpha_delta/2
         
         if meas > delta:
-            new_delta = np.sqrt(alpha_delta_red*meas**2 + (1-alpha_delta_red)*delta**2)
-            spike = 1
+            new_delta = (alpha_delta_red * meas**2 + (1 - alpha_delta_red) * delta**2)**(1/2)
+            if x > 5000:
+                spike = 1
+            else: spike = 0
             new_eff_dc = alpha_dc_red * (x + eff_dc)/2 + (1 - alpha_dc_red) * eff_dc
         else:
-            new_delta = np.sqrt(alpha_delta*meas**2 + (1-alpha_delta)*delta**2)
+            new_delta = (alpha_delta * meas**2 + (1 - alpha_delta) * delta**2)**(1/2)
             spike = 0
             new_eff_dc = alpha_dc * x + (1 - alpha_dc) * eff_dc
             
         return new_eff_dc, new_delta, meas, spike
+
+    def apply_sded_dual(
+        x,
+        eff_dc,
+        alpha_dc,
+        delta_min,
+        delta_max,
+        t=0,
+        gamma0_min=1,
+        gamma0_max=1,
+        desired=None,
+        mode='adaptive',
+        q=2,
+        max_cap=19000
+    ):
+        """
+        Single‐sample SDED with dual thresholds (min/max) and optional adaptation.
+
+        Parameters
+        ----------
+        x : float
+            Current signal sample.
+        eff_dc : float
+            Current DC estimate.
+        alpha_dc : float
+            DC adaptation rate (0 < alpha_dc < 1).
+        delta_min : float
+            Current minimum deviation threshold.
+        delta_max : float
+            Current maximum deviation threshold.
+        t : int
+            Count of delta bound changes.
+        gamma0_min : float
+            Initial learning rate for delta_min (empirically set).
+        gamma0_max : float
+            Initial learning rate for delta_max (empirically set).
+        desired : {0,1}, optional
+            Ground‐truth label for this sample.  **Required** if mode='adaptive'.
+        mode : {'static','adaptive'}, default='adaptive'
+            If 'static', thresholds remain unchanged; if 'adaptive', they update on
+            misclassifications.
+        q : float, default=2
+            Slowdown factor for DC learning on spikes (alpha_dc_red = alpha_dc/q).
+        max_cap : float, default=19000
+            Hard cap for delta_max.
+
+        Returns
+        -------
+        new_eff_dc : float
+            Updated DC estimate.
+        new_delta_min : float
+            Updated minimum threshold.
+        new_delta_max : float
+            Updated maximum threshold.
+        new_t : int
+            Updated count.
+        meas : float
+            |x – eff_dc| (the measured deviation).
+        spike : {0,1}
+            1 if deviation ∈ (delta_min, delta_max), else 0.
+        """
+
+        # 1) measure and classify
+        meas = abs(x - eff_dc)
+        spike = 1 if (meas > delta_min and meas < delta_max) else 0
+
+        # 2) update DC estimate (slow down on spikes)
+        alpha_eff = alpha_dc / q if spike == 1 else alpha_dc
+        new_eff_dc = alpha_eff * x + (1 - alpha_eff) * eff_dc
+
+        # 3) prepare thresholds (static by default)
+        new_delta_min = delta_min
+        new_delta_max = delta_max
+        new_t = t
+
+        # 4) adaptive‐mode threshold updates
+        if mode == 'adaptive':
+            if desired is None:
+                raise ValueError("`desired` (0 or 1) must be provided in adaptive mode")
+
+            # decayed learning‐rates
+            gamma_min = gamma0_min / (1 + t)
+            gamma_max = gamma0_max / (1 + t)
+
+            # 4a) missed positive → expand the violated bound toward meas
+            if desired == 1 and spike == 0:
+                new_t +=1
+                if meas <= delta_min:
+                    new_delta_min = delta_min + gamma_min * (meas - delta_min)
+                else:  # meas >= delta_max
+                    new_delta_max = delta_max + gamma_max * (meas - delta_max)
+
+            # 4b) false positive → shrink the nearer bound away from meas
+            elif desired == 0 and spike == 1:
+                new_t +=1
+                if abs(delta_min - meas) < abs(delta_max - meas):
+                    # meas closer to delta_min → raise delta_min
+                    new_delta_min = delta_min + gamma_min * (meas - delta_min)
+                else:
+                    # meas closer to delta_max → lower delta_max
+                    new_delta_max = delta_max + gamma_max * (meas - delta_max)
+
+            # 5) clip to [0, max_cap] and sanity‐check band
+            new_delta_min = max(0.0, new_delta_min)
+            new_delta_max = min(max_cap, new_delta_max)
+
+            # if adaptation would invert the band, revert to previous thresholds
+            if new_delta_min >= new_delta_max:
+                new_delta_min, new_delta_max = delta_min, delta_max
+
+        return new_eff_dc, new_delta_min, new_delta_max, new_t, meas, spike
