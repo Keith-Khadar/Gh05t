@@ -427,8 +427,8 @@ class MainWindow(QMainWindow):
         previous_buffer = self.data_buffer.copy() if self.data_buffer is not None else None
         # store 500 data points for running average -> signal processing
         if (self.data_buffer is None) or (len(self.data_buffer) == 0):
-            self.data_buffer = np.tile(new_data, (1, 500))
-        elif self.data_buffer.shape[1] < 500:
+            self.data_buffer = np.tile(new_data, (1, 64))
+        elif self.data_buffer.shape[1] < 64:
             self.data_buffer = np.hstack((self.data_buffer, new_data))
 
         # Apply filters
@@ -452,12 +452,13 @@ class MainWindow(QMainWindow):
         if self.apply_model and self.default_model:
             if previous_buffer is not None and previous_buffer.shape[1] >= 500:
                 elapsed_time = time.time() - self.start_time_label
-                if elapsed_time > 5:
+                # print(elapsed_time)
+                if elapsed_time > 10:
                     spikes, _ = self.signal_processing_window.detect_emg(new_data, previous_buffer)
+                    if np.any(spikes):
+                        self.label = 1
                 else:
-                    self.signal_processing_window.detect_emg(new_data, previous_buffer, self.label, rt='adaptive')
-                if np.any(spikes):
-                    self.label = 1
+                    self.signal_processing_window.detect_emg(new_data, previous_buffer, self.label, mode='adaptive')
 
         if self.labeling_mode:
             label = self.label
@@ -610,7 +611,7 @@ class MainWindow(QMainWindow):
         if not self.labeling_mode:
             self.labeling_mode = True
 
-        start_time_label = time.time()
+        self.start_time_label = time.time()
 
         # if not (self.ble_reading or self.websocket_reading):
         #     if self.default_model:

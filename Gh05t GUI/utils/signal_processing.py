@@ -5,6 +5,7 @@ from PyQt5.QtCore import pyqtSignal, Qt, QSettings
 import joblib
 from scipy.signal import butter, filtfilt, sosfiltfilt, iirnotch, tf2sos, lfilter_zi, lfilter
 import numpy as np
+import time
 
 class SignalProcessingWindow(QDialog):
     update_status_signal = pyqtSignal(str)
@@ -169,8 +170,14 @@ class SignalProcessingWindow(QDialog):
         self.alpha_delta = 0.1 # adaptive change
         self.delta_init = 1000 # threshold
         self.use_adaptive = False 
+
+        self.weights = np.zeros(64)  # buffer weights
+
+        self.t = 0
+        self.eff_mean = [0.0] * 8
         self.eff_dc = [0.0] * 8
-        self.delta = [self.delta_init] * 8
+        self.delta_min = [self.delta_init] * 8
+        self.delta_max = [self.delta_init] * 8
 
         # lms weight history
         self.w_lms_k = []
@@ -332,6 +339,7 @@ class SignalProcessingWindow(QDialog):
         self.clear_model_button.setVisible(False)
         self.use_default_model_checkbox.setChecked(False)
 
+        self.start_time_label = time.time()
         self.update_status_signal.emit("Model cleared.")
 
     def toggle_labeling_mode(self, state):
@@ -426,30 +434,27 @@ class SignalProcessingWindow(QDialog):
         spikes = [0] * 8
         measurements = [0] * 8
 
-        # Calculate moving average for each channel
-        moving_avg = np.mean(buffer, axis=1, keepdims=True)
-
-        deviated_sample = raw_data - moving_avg
-
-        if self.max_raw < deviated_sample[0]:
-            self.max_raw = deviated_sample[0]
-            print(self.max_raw)
+        # NLMS Implementation -- Second Stage of Training
+        elapsed_time = time.time() - self.start_time_label
+        # print(elapsed_time)
+        if elapsed_time > 5:
+            # tolerance to reset t to zero
+            if 5.01 > elapsed_time > 5:
+                self.t = 0
+            #LMS implementation
+            x_ref = np.random.normal(self.eff_mean, self.eff_std, 64)
+            self.weights, x = self.apply_nlms_filter(x_ref, self.weights, buffer[-1], mu=0.99, eps=1e-6)
 
         for ch in range(8):
-            x = deviated_sample[ch, 0]
+            x_sample = x[ch, 0]
             
             if self.use_adaptive:
-                # (self.eff_dc[ch], self.delta[ch], 
-                # measurements[ch], spikes[ch]) = self._apply_sded_adaptive(
-                #     x, self.eff_dc[ch], self.alpha, self.alpha_delta, self.delta[ch]
-                # )
-
-                (self.eff_dc[ch], self.delta[ch], measurements[ch], spikes[ch]) = self.apply_sded_dual(
-                    x, self.eff_dc[ch], self.alpha[ch], self.alpha_delta[ch], self.delta[ch], 0, 1, 1, label, mode, 2, 19000)
+                (self.eff_mean[ch], self.eff_dc[ch], self.delta_min[ch], self.delta_max[ch], self.t, measurements[ch], spikes[ch]) = self.apply_sded_dual(
+                    x_sample, self.eff_mean[ch], self.eff_dc[ch], self.alpha[ch], self.delta_min[ch], self.delta_max[ch], self.t, 0, 1, 1, label, mode, 2, 19000)
             else:
                 (self.eff_dc[ch], measurements[ch], 
                 spikes[ch]) = self._apply_sded_fixed(
-                    x, self.eff_dc[ch], self.alpha, self.delta[ch]
+                    x_sample, self.eff_dc[ch], self.alpha, self.delta[ch]
                 )
 
         return np.array(spikes), raw_data
@@ -491,10 +496,34 @@ class SignalProcessingWindow(QDialog):
             
         return new_eff_dc, new_delta, meas, spike
 
-    def apply_sded_dual(
+    def apply_nlms_filter(self, x_ref, w_lms_k, x_dsr, mu=None, eps=None):
+        """
+        Applies the NLMS filter to the input signal x_in.
+
+        x_in: input signal (M x 1)
+        w_lms_k: filter weights at time k (M x 1)
+        y_noisy: noisy output signal (scalar)
+        mu: learning rate
+        eps: regularization parameter
+        """
+        if mu is None:
+            raise ValueError("mu must be specified.")
+        if eps is None:
+            raise ValueError("eps must be specified.")
+            
+        y_hat = np.dot(w_lms_k, x_ref)
+        e = x_dsr - y_hat
+        x_pow  = np.dot(x_ref, x_ref)
+        mu_eff = mu / (x_pow + eps)
+        w_lms_k1 = w_lms_k + mu_eff * e * x_ref
+
+        return w_lms_k1, e
+
+    def apply_sded_dual(self,
         x,
-        eff_dc,
-        alpha_dc,
+        eff_mean,
+        eff_std,
+        alpha,
         delta_min,
         delta_max,
         t=0,
@@ -512,10 +541,12 @@ class SignalProcessingWindow(QDialog):
         ----------
         x : float
             Current signal sample.
-        eff_dc : float
-            Current DC estimate.
-        alpha_dc : float
-            DC adaptation rate (0 < alpha_dc < 1).
+        eff_mean : float
+            Current mean estimate.
+        eff_std : float
+            Current standard deviation estimate.
+        alpha : float
+            Mean and standard deviation adaptation rate (0 < alpha_dc < 1).
         delta_min : float
             Current minimum deviation threshold.
         delta_max : float
@@ -538,8 +569,10 @@ class SignalProcessingWindow(QDialog):
 
         Returns
         -------
-        new_eff_dc : float
-            Updated DC estimate.
+        new_eff_mean : float
+            Updated mean estimate.
+        new_eff_std : float
+            Updated standard deviation estimate.
         new_delta_min : float
             Updated minimum threshold.
         new_delta_max : float
@@ -553,12 +586,13 @@ class SignalProcessingWindow(QDialog):
         """
 
         # 1) measure and classify
-        meas = abs(x - eff_dc)
+        meas = abs(x - eff_mean)
         spike = 1 if (meas > delta_min and meas < delta_max) else 0
 
-        # 2) update DC estimate (slow down on spikes)
-        alpha_eff = alpha_dc / q if spike == 1 else alpha_dc
-        new_eff_dc = alpha_eff * x + (1 - alpha_eff) * eff_dc
+        # 2) update mean and std estimate (slow down on spikes)
+        alpha_eff = alpha / q if spike == 1 else alpha
+        new_eff_mean = alpha_eff * x + (1 - alpha_eff) * eff_mean
+        new_eff_std = (alpha_eff * meas**2 + (1 - alpha_eff) * eff_std**2)**(1/2)
 
         # 3) prepare thresholds (static by default)
         new_delta_min = delta_min
@@ -600,4 +634,4 @@ class SignalProcessingWindow(QDialog):
             if new_delta_min >= new_delta_max:
                 new_delta_min, new_delta_max = delta_min, delta_max
 
-        return new_eff_dc, new_delta_min, new_delta_max, new_t, meas, spike
+        return new_eff_mean, new_eff_std, new_delta_min, new_delta_max, new_t, meas, spike
